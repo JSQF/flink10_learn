@@ -14,11 +14,16 @@ object WordCount {
     val env = ExecutionEnvironment.getExecutionEnvironment
 
     val filePtah = "/Users/yyb/Downloads/1.txt"
+    val filepathtosave = "/Users/yyb/Downloads/1_rs.csv"
     val text =  env.readTextFile(filePtah)
     val wordCounts = text.flatMap(_.toLowerCase.split("\\W+") filter { _.nonEmpty})
       .map((_, 1))
       .groupBy(0)
       .sum(1)
     wordCounts.setParallelism(1).print()
+    wordCounts.setParallelism(1).writeAsCsv(filepathtosave)
+
+
+    env.execute("WordCount")
   }
 }
