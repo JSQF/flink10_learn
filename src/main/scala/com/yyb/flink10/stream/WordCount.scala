@@ -30,7 +30,7 @@ object WordCount {
       .withPartSuffix("exe")
       .build()
 
-    val text =
+    val text: DataStream[String] =
       if(params.has("--input")){
         env.readTextFile(params.get("--input"))
       }else{
@@ -57,12 +57,9 @@ object WordCount {
             .withInactivityInterval(TimeUnit.MINUTES.toMillis(5))
             .withMaxPartSize(1024 * 1024 * 1024)
             .build())
+        // .withBucketAssigner(new DateTimeBucketAssigner()) //这种方式，即以时间格式 yyyy-MM-dd--HH，可以自己修改 以时间格式 和 时区
 
-        /**
-          * 注意 当是 forRowFormat 的时候 不能使用 BucketAssigner
-          */
-        //        .withBucketAssigner(new DateTimeBucketAssigner()) //这种方式，即以时间格式 yyyy-MM-dd--HH，可以自己修改 以时间格式 和 时区
-//        .withBucketAssigner(new BasePathBucketAssigner[(String, Int)]) //这种方式就是 不会指定 子文件的命名方式。
+        .withBucketAssigner(new BasePathBucketAssigner[(String, Int)]()) //这种方式就是 不会指定 子文件的命名方式。
 //        .withOutputFileConfig(config) // 设置输出文件的 前后缀
         .build()
 
