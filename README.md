@@ -28,8 +28,11 @@ StreamingFileSink 有2种 File Formats：
 #### Bulk-encoded sink 需要也指定 写目录和 BulkWriter.Factory.
 BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactory, SequenceFileWriterFactory
 对应 三个 数据格式 (注意需要添加 maven flink 依赖)：
+
 1. ParquetWriterFactory parquet格式 需要添加 flink-parquet 和 parquet-avro 依赖
+
 2. Hadoop SequenceFileWriterFactory 需要添加依赖 flink-sequence-file、hadoop-client、flink-hadoop-compatibility 
+
 3. SequenceFileWriterFactory supports additional constructor parameters to specify compression settings
 
 ### StreamingFileSink RollingPolicy(滚动策略，文件轮替)
@@ -58,6 +61,17 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 
 这一部分是配置 输出文件的 前后缀的：
 可以是调用 .withOutputFileConfig(config) 和 OutputFileConfig 结合 配置 输出文件的 前后缀的。
+
+## Table & SQL
+注意 Blink 和 Flink 在 Table&SQL 中的区别：
+1. Blink batch 是 streaming 的特例，所以 table 和 dateset 之间的转化 是不支持的。
+2. Blink 不支持 BatchTableSource，可以使用 bounded StreamTableSource 代替。
+3. Blink 只支持 Catalog，并且不再支持 ExternalCatalog。
+4. FilterableTableSource 的实现 对于 old flink planner 和 Blink 是不兼容的；old flink planner 把 PlannerExpressions 下推到 FilterableTableSource； Blink 则下推到 Expressions。
+5. key-value 的 config options 只对于 Blink 使用。
+6. PlannerConfig 的实现 在这 2 种 是不一样的。
+7. Blink 优化多个 sink 对于一个DAG（只有 TableEnvironment， 不支持 StreamTableEnvironment ）；old flink planner 总是优化 每个 sink 在新的 DAG。
+8. old flink planner 不再支持 catalog statistics，Blink 则支持。
 
 ## 问题
 ### 从 flink 官网使用 maven 初始化的项目 问题
