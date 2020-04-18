@@ -100,11 +100,19 @@ under the License.
 			<scope>runtime</scope>
 		</dependency>
 
+        <!-- parquet need -->
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-parquet_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.apache.parquet</groupId>
+		    <artifactId>parquet-avro</artifactId>
+		    <version>1.10.0</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

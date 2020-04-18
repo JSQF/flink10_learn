@@ -18,15 +18,15 @@ stream存放 流代码的包
 StreamingFileSink 有2种 File Formats：
 1. Row-encoded sink
 2. Bulk-encoded sink
-注意 在 使用 StreamingFileSink 的时候需要开启 Checkpointing。
+注意 在 使用 StreamingFileSink 的时候需要开启 Checkpointing。负责写的文件可能一直处于 in-progress 或者 pending 的状态。
 
 
 #### Row-encoded sink 需要指定 写目录 和 Encoder：
 这个 Encoder 只有一个 直接子类 SimpleStringEncoder 只是对数据做一个编码，如果要实现自己的 可以继承这个类
 #### Bulk-encoded sink 需要也指定 写目录和 BulkWriter.Factory.
 BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactory, SequenceFileWriterFactory
-对应 三个 数据格式 (注意需要添加 maven flink依赖)：
-1. ParquetWriterFactory
+对应 三个 数据格式 (注意需要添加 maven flink 依赖)：
+1. ParquetWriterFactory parquet格式 需要添加 flink-parquet 和 parquet-avro 依赖
 2. Hadoop SequenceFileWriterFactory
 3. SequenceFileWriterFactory supports additional constructor parameters to specify compression settings
 

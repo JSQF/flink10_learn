@@ -2,7 +2,7 @@ package com.yyb.flink10.stream.parquet
 
 import java.util.concurrent.TimeUnit
 
-import com.yyb.flink10.stream.WordCountData
+import com.yyb.flink10.stream.data.WordCountData
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.core.fs.Path

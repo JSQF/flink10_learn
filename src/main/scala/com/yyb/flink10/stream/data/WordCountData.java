@@ -1,4 +1,4 @@
-package com.yyb.flink10.stream;
+package com.yyb.flink10.stream.data;
 
 /**
  * @Author yyb

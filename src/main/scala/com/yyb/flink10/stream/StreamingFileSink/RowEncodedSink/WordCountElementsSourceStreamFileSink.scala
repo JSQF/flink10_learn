@@ -1,14 +1,12 @@
-package com.yyb.flink10.stream
+package com.yyb.flink10.stream.StreamingFileSink.RowEncodedSink
 
-import java.util.concurrent.TimeUnit
-
+import com.yyb.flink10.stream.data.WordCountData
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.core.fs.Path
-import org.apache.flink.streaming.api.functions.sink.filesystem.{BucketAssigner, OutputFileConfig, StreamingFileSink}
-import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.{BasePathBucketAssigner, DateTimeBucketAssigner}
-import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.BasePathBucketAssigner
+import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
 
 /**
@@ -17,7 +15,7 @@ import org.apache.flink.streaming.api.scala._
   * @Date Create in 2020-04-15
   * @Time 21:45
   */
-object WordCount {
+object WordCountElementsSourceStreamFileSink {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     val params = ParameterTool.fromArgs(args)

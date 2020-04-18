@@ -1,5 +1,6 @@
-package com.yyb.flink10.stream;
+package com.yyb.flink10.stream.StreamingFileSink.RowEncodedSink;
 
+import com.yyb.flink10.stream.data.WordCountData;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringEncoder;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * @Date Create in 2020-04-17
  * @Time 17:20
  */
-public class WordCountJava {
+public class WordCountElementsSourceStreamFileSinkJava {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         ParameterTool params = ParameterTool.fromArgs(args);
