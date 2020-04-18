@@ -62,3 +62,16 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 1. idea 本地运行 提示 缺包问题。修改 pom文件 dependency 的 scope 范围，可以直接注释掉这个 选项
 ### batch 程序 有的 地方不执行的问题
 1. batch 程序 有的地方没有执行，可能你的程序 最后没有调用 env.execution() 方法
+
+
+## Flink10 BUG
+### StreamingFileSink build bug
+当使用 StreamingFileSink 的多个 with... 方法时，会提示
+ 
+      Error:xxx value build is not a member of ?0
+      possible cause: maybe a semicolon is missing before `value build'?
+      build()
+      
+请注意，这是一个 flink StreamingFileSink scala 版本的是一个 bug，可以使用 java 版本编写，或者使用 更高的 flink 版本。
+
+详情见：https://issues.apache.org/jira/browse/FLINK-16684
