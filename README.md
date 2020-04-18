@@ -8,7 +8,9 @@ stream存放 流代码的包
 
 
 ## flink parquet
-1. 增加 flink-parquet maven 依赖
+1. 增加 flink-parquet maven 依赖 需要添加 flink-parquet 和 parquet-avro 依赖
+2. batch 模式下 没有找到可以写 parquet 文件的方法，stream 模式下 可以通过 StreamingFileSink 的 Bulk-encoded Formats 输出 parquet文件
+3. 目前 没有找到 类型 spark 读 parquet 文件 的类似方式
 
 
 ## Checkpointing
@@ -27,7 +29,7 @@ StreamingFileSink 有2种 File Formats：
 BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactory, SequenceFileWriterFactory
 对应 三个 数据格式 (注意需要添加 maven flink 依赖)：
 1. ParquetWriterFactory parquet格式 需要添加 flink-parquet 和 parquet-avro 依赖
-2. Hadoop SequenceFileWriterFactory
+2. Hadoop SequenceFileWriterFactory 需要添加依赖 flink-sequence-file、hadoop-client、flink-hadoop-compatibility 
 3. SequenceFileWriterFactory supports additional constructor parameters to specify compression settings
 
 ### StreamingFileSink RollingPolicy(滚动策略，文件轮替)
@@ -44,7 +46,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 注意这2个类都实现了 flink 的 RollingPolicy 接口，但是这个接口的实现有3个 DefaultRollingPolicy、OnCheckpointRollingPolicy、CheckpointRollingPolicy。
 其中 CheckpointRollingPolicy 是抽象类，而 OnCheckpointRollingPolicy 又是 CheckpointRollingPolicy抽象类的实现。
 
-因为 flink stream 不像spark stream 一样是 微批处理模式，不会产生 小文件，所以这里如果不指定 滚动策略，那么可能都在文件中追加内容。
+因为 flink stream 不像spark stream 一样是 微批处理模式，不会产生 小文件，所以这里如果不指定 滚动策略，那么可能都在文件中追加内容 ？ 。
 
 
 ### StreamingFileSink BucketAssigner(输出文件 名称 指定 匹配模式)
@@ -72,6 +74,6 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
       possible cause: maybe a semicolon is missing before `value build'?
       build()
       
-请注意，这是一个 flink StreamingFileSink scala 版本的是一个 bug，可以使用 java 版本编写，或者使用 更高的 flink 版本。
+请注意，这是 flink StreamingFileSink scala 版本的是一个 bug，可以使用 java 版本编写，或者使用 更高的 flink 版本。
 
 详情见：https://issues.apache.org/jira/browse/FLINK-16684
