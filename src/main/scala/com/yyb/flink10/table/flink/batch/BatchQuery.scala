@@ -1,9 +1,9 @@
-package com.yyb.flink10.table.flink
+package com.yyb.flink10.table.flink.batch
 
-import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.flink.table.api.scala.BatchTableEnvironment
+import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api.Table
+import org.apache.flink.table.api.scala.BatchTableEnvironment
 
 /**
   * @Author yyb
@@ -14,7 +14,7 @@ import org.apache.flink.table.api.Table
 object BatchQuery {
   def main(args: Array[String]): Unit = {
     val env = ExecutionEnvironment.getExecutionEnvironment
-    val batchTableEnv = BatchTableEnvironment.create(env)
+    val batchTableEnv: BatchTableEnvironment = BatchTableEnvironment.create(env)
 
     val words = "hello flink hello lagou"
     val WDS = words.split("\\W+").map(WD(_, 1))
@@ -23,10 +23,18 @@ object BatchQuery {
 
     val table: Table = batchTableEnv.fromDataSet(input)
 
+
     batchTableEnv.createTemporaryView("wordcount", table)
 
     batchTableEnv.sqlQuery("select * from wordcount").printSchema()
 
+    val datasetOfTable: DataSet[WD] =  batchTableEnv.toDataSet[WD](table)
+
+    datasetOfTable.printToErr()
+
+
+
+    batchTableEnv.execute("BatchQuery")
 
   }
 

@@ -73,6 +73,22 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 7. Blink 优化多个 sink 对于一个DAG（只有 TableEnvironment， 不支持 StreamTableEnvironment ）；old flink planner 总是优化 每个 sink 在新的 DAG。
 8. old flink planner 不再支持 catalog statistics，Blink 则支持。
 
+### Flink Batch Table
+1. 可以从 DateSet 转化到 Table
+2. 可以把 Table 转化到 DateSet
+
+### Flink Stream Table
+1. 可以从 DateStream 转化到 Table
+2. 可以把 Table 转化到 DateStream
+
+### Blink Batch Table
+1. 可以从 DateSet 转化到 Table
+2. 目前还未找到 Table 转化为 DateSet的 方式
+
+### Blink Stream Table
+1. 可以从 DateStream 转化到 Table
+2. 可以把 Table 转化到 DateStream
+
 ## 问题
 ### 从 flink 官网使用 maven 初始化的项目 问题
 1. idea 本地运行 提示 缺包问题。修改 pom文件 dependency 的 scope 范围，可以直接注释掉这个 选项
