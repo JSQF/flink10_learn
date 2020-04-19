@@ -64,7 +64,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 
 ## Table & SQL
 注意 Blink 和 Flink 在 Table&SQL 中的区别：
-1. <span id='reson1'><font color=red>Blink batch 是 streaming 的特例，所以 table 和 dateset 之间的转化 是不支持的。</font></span>
+1. <span id='reson1' style="color:red;">Blink batch 是 streaming 的特例，所以 table 和 dateset 之间的转化 是不支持的。</span>
 2. Blink 不支持 BatchTableSource，可以使用 bounded StreamTableSource 代替。
 3. Blink 只支持 Catalog，并且不再支持 ExternalCatalog。
 4. FilterableTableSource 的实现 对于 old flink planner 和 Blink 是不兼容的；old flink planner 把 PlannerExpressions 下推到 FilterableTableSource； Blink 则下推到 Expressions。
