@@ -2,3 +2,5 @@
 target/
 *.iml
 xxx.text/
+metastore_db/
+*.log
