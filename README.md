@@ -83,7 +83,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 
 ### Blink Batch Table
 1. 可以从 DateSet 转化到 Table
-2. 目前还未找到 Table 转化为 DateSet的 方式  [原因点击查看,位于 Table & SQL 的 注意 第一条](reson1)
+2. 目前还未找到 Table 转化为 DateSet的 方式  [原因点击查看,位于 Table & SQL 的 注意 第一条](#reson1)
 3. hive
 
 ### Blink Stream Table
