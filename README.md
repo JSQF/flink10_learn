@@ -83,7 +83,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 
 ### Blink Batch Table
 1. 可以从 DateSet 转化到 Table
-2. 目前还未找到 Table 转化为 DateSet的 方式  [原因点击查看,位于 Table & SQL 的 注意 第一条](#reson1)
+2. 目前还未找到 Table 转化为 DateSet的 方式  [原因点击查看,位于 Table & SQL 的 注意 第一条](reson1)
 3. hive
 
 ### Blink Stream Table
@@ -96,7 +96,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 1. 依赖 flink-connector-hive_2.11、hive-exec、flink-table-api-java-bridge_2.1、datanucleus-api-jdo、javax.jdo、datanucleus-rdbms、derby、mysql-connector-java  
 注意 在解决 maven依赖的时候 需要仔细，可以提示配置的 版本没有 需要的方法，请注意修改版本，上面的依赖都是本人一步步慢慢解决出来的。
 2. 依赖 hive-conf/hive-site.xml，如果本地需要的话，需要下载到 resources 里面，并且需要配置其中的 datanucleus.schema.autoCreateAll 为 true
-3. 在 new  HiveCatalog 时的 hiveConfDir 参数时候，请注意 配置到文件，不能指定 null。[可参见代码](#./src/main/scala/com/yyb/flink10/table/blink/batch/BlinkHiveBatchDemo.scala)
+3. 在 new  HiveCatalog 时的 hiveConfDir 参数时候，请注意 配置到文件，不能指定 null。[可参见代码](./src/main/scala/com/yyb/flink10/table/blink/batch/BlinkHiveBatchDemo.scala)
 
 ## 问题
 ### 从 flink 官网使用 maven 初始化的项目 问题
