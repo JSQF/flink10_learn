@@ -1,6 +1,5 @@
 # Flinl10_learn
-主要用于学习 flink 10 版本的目的  
-[toc]  
+主要用于学习 flink 10 版本的目的    
 ## 包目录介绍
 batch存放 批代码的包
 
@@ -22,6 +21,9 @@ stream存放 流代码的包
 #### readFile
 #### createInput
 ##### read from JDBC
+1. 需要maven依赖 flink-jdbc_2.11、mysql-connector-java  
+2. 编写代码时候需要 自己 指定 字段名称和类型  
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/ConnectJDBCBatch.scala)
 
 ## Sink
 ### StreamingFileSink format
