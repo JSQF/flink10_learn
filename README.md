@@ -1,6 +1,6 @@
 # Flinl10_learn
-主要用于学习 flink 10 版本的目的
-
+主要用于学习 flink 10 版本的目的  
+[toc]  
 ## 包目录介绍
 batch存放 批代码的包
 
@@ -14,6 +14,14 @@ stream存放 流代码的包
 
 
 ## Checkpointing
+
+## Source
+### File-based
+### Collection-based
+### Generic
+#### readFile
+#### createInput
+##### read from JDBC
 
 ## Sink
 ### StreamingFileSink format
@@ -84,7 +92,10 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 ### Blink Batch Table
 1. 可以从 DateSet 转化到 Table
 2. 目前还未找到 Table 转化为 DateSet的 方式  [原因点击查看,位于 Table & SQL 的 注意 第一条](#reson1)
-3. hive
+3. hive 操作。
+#### Blibk Hive DDL
+[DDL to create Hive tables, views, partitions, functions within Flink will be supported soon.](#https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/hive/#ddl)
+#### Blibk Hive DMl
 
 ### Blink Stream Table
 1. 可以从 DateStream 转化到 Table
@@ -97,6 +108,13 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 注意 在解决 maven依赖的时候 需要仔细，可以提示配置的 版本没有 需要的方法，请注意修改版本，上面的依赖都是本人一步步慢慢解决出来的。
 2. 依赖 hive-conf/hive-site.xml，如果本地需要的话，需要下载到 resources 里面，并且需要配置其中的 datanucleus.schema.autoCreateAll 为 true
 3. 在 new  HiveCatalog 时的 hiveConfDir 参数时候，请注意 配置到文件，不能指定 null。[可参见代码](./src/main/scala/com/yyb/flink10/table/blink/batch/BlinkHiveBatchDemo.scala)
+
+### Connect to External Systems
+#### Filesystem
+#### Elasticsearch
+#### Apache Kafka
+#### HBase
+#### JDBC
 
 ## 问题
 ### 从 flink 官网使用 maven 初始化的项目 问题
@@ -125,4 +143,4 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
     	at org.datanucleus.store.rdbms.table.AbstractTable.exists(AbstractTable.java:606)
     	at org.datanucleus.store.rdbms.RDBMSStoreManager$ClassAdder.performTablesValidation(RDBMSStoreManager.java:3385)
 
-解决方式就是 指定 hiveConfDir 目录。
+解决方式就是 指定 hiveConfDir 目录。[可参见代码](./src/main/scala/com/yyb/flink10/table/blink/batch/BlinkHiveBatchDemo.scala)

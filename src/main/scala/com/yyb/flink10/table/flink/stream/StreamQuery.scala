@@ -39,6 +39,7 @@ object StreamQuery {
 
     appendDateStream.print()
 
+
     env.execute("StreamQuery")
   }
 
