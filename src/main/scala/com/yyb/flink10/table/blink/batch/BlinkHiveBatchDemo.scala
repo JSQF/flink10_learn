@@ -16,7 +16,7 @@ object BlinkHiveBatchDemo {
 
     val name = "myhive"
     val defaultDatabase = "flink"
-    val hiveConfDir = "src/main/resources/" //hive-site.xml的本地目录 ，注意 当有 hive-site.xml 在 resources 下的时候 ，hiveConfDir 需要设置为 null
+    val hiveConfDir = "src/main/resources/" //hive-site.xml的本地目录 ，注意 当有 hive-site.xml 在 resources 下的时候 ，hiveConfDir 也需要设置
     val version = "2.3.6"
     val hive = new  HiveCatalog(name, defaultDatabase, hiveConfDir, version)
 
