@@ -23,6 +23,7 @@ object BlinkHiveBatchDemo {
     bbTableEnv.registerCatalog("myhive", hive)
     bbTableEnv.useCatalog("myhive")
 
+    //注意 查询语句 myhive.flink.a myhive是你的Hcatalog的别称，flink是库名称，a是别名称
     bbTableEnv.sqlQuery("select * from myhive.flink.a").printSchema()
 
 
