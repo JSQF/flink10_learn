@@ -116,3 +116,13 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 请注意，这是 flink StreamingFileSink scala 版本的是一个 bug，可以使用 java 版本编写，或者使用 更高的 flink 版本。
 
 详情见：https://issues.apache.org/jira/browse/FLINK-16684
+### HiveCatalog hiveConfDir Bug
+当使用 resources 目录下的 hive-site.xml 配置文件时，需要指定 hiveConfDir 的目录，且不能为null，
+否则会出现一下错误：
+
+    Required table missing : "DBS" in Catalog "" Schema "". DataNucleus requires this table to perform its persistence operations. Either your MetaData is incorrect, or you need to enable "datanucleus.schema.autoCreateTables"
+    org.datanucleus.store.rdbms.exceptions.MissingTableException: Required table missing : "DBS" in Catalog "" Schema "". DataNucleus requires this table to perform its persistence operations. Either your MetaData is incorrect, or you need to enable "datanucleus.schema.autoCreateTables"
+    	at org.datanucleus.store.rdbms.table.AbstractTable.exists(AbstractTable.java:606)
+    	at org.datanucleus.store.rdbms.RDBMSStoreManager$ClassAdder.performTablesValidation(RDBMSStoreManager.java:3385)
+
+解决方式就是 指定 hiveConfDir 目录。
