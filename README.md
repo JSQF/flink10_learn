@@ -10,7 +10,7 @@ stream存放 流代码的包
 ## flink parquet
 1. 增加 flink-parquet maven 依赖 需要添加 flink-parquet 和 parquet-avro 依赖
 2. batch 模式下 没有找到可以写 parquet 文件的方法，stream 模式下 可以通过 StreamingFileSink 的 Bulk-encoded Formats 输出 parquet文件
-3. 目前 没有找到 类型 spark 读 parquet 文件 的类似方式
+3. 目前 没有找到 类似 spark 读 parquet 文件 的类似方式
 
 
 ## Checkpointing
