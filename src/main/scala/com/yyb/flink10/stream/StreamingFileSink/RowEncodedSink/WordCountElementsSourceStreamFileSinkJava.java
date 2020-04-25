@@ -48,7 +48,7 @@ public class WordCountElementsSourceStreamFileSinkJava {
         DataStream<Tuple2<String, Integer>> counts = text.flatMap(new myFlatMap());
         SingleOutputStreamOperator<Tuple2<String, Integer>> rs = counts.keyBy(0).sum(1);
 
-        StreamingFileSink streamingFileSink = StreamingFileSink.forRowFormat(new Path("./xxx.text"),
+        StreamingFileSink streamingFileSink = StreamingFileSink.forRowFormat(new Path("./xxx.text/rs4"),
                 new SimpleStringEncoder<Tuple2<String, Integer>>("utf-8"))
                 .withRollingPolicy(DefaultRollingPolicy.builder()
                         .withRolloverInterval(TimeUnit.MINUTES.toMillis(15))

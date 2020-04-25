@@ -40,7 +40,6 @@ object BatchQuery {
     bbTableEnv.sqlQuery("select * from wordcount").printSchema()
 
 
-
     bbTableEnv.execute("BatchQuery")
 
 

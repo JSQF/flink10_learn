@@ -1,13 +1,14 @@
-package com.yyb.flink10.table.flink.batch
+package com.yyb.flink10.table.flink.stream
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.java.io.jdbc.JDBCInputFormat
 import org.apache.flink.api.java.io.jdbc.JDBCInputFormat.JDBCInputFormatBuilder
 import org.apache.flink.api.java.typeutils.RowTypeInfo
-import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.flink.api.scala._
+import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.api.scala.typeutils.Types
-import org.apache.flink.table.api.scala.BatchTableEnvironment
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.table.api.Table
+import org.apache.flink.table.api.scala.{BatchTableEnvironment, StreamTableEnvironment}
+import org.apache.flink.table.descriptors.BatchTableDescriptor
 import org.apache.flink.types.Row
 
 /**
@@ -16,10 +17,10 @@ import org.apache.flink.types.Row
   * @Date Create in 2020-04-21
   * @Time 14:15
   */
-object ConnectJDBCBatch {
+object ConnectJDBCStream {
   def main(args: Array[String]): Unit = {
-    val env = ExecutionEnvironment.getExecutionEnvironment
-    val batchTableEnv = BatchTableEnvironment.create(env)
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
+    val streamTableEnv = StreamTableEnvironment.create(env)
 
     val types =  Array[TypeInformation[_]](Types.STRING, Types.LONG, Types.STRING)
     val fields = Array[String]("MT_KEY1", "MT_KEY2", "MT_COMMENT")
@@ -34,11 +35,23 @@ object ConnectJDBCBatch {
         .setQuery("select * from AUX_TABLE")
       .setRowTypeInfo(typeInfo)
         .finish()
-    val mysqlSource : DataSet[Row] =  env.createInput(jdbc)
+    val mysqlSource: DataStream[Row] =  env.createInput(jdbc)
 
     mysqlSource.print()
 
+    val table: Table = streamTableEnv.fromDataStream(mysqlSource)
+
+    streamTableEnv.createTemporaryView("AUX_TABLE", table)
+
+    val table_q: Table = streamTableEnv.sqlQuery("select * from AUX_TABLE")
+    table_q.printSchema()
+
+
+
+
+
+
     //目前来看，只有在 有 sink的情况下，需要 加 execute
-    batchTableEnv.execute("ConnectJDBCBatch")
+    streamTableEnv.execute("ConnectJDBCBatch")
   }
 }

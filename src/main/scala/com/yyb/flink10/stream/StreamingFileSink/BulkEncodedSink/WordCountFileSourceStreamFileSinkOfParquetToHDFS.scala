@@ -5,12 +5,9 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.core.fs.Path
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters
 import org.apache.flink.streaming.api.CheckpointingMode
-import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
-import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
-import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.BasePathBucketAssigner
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
+import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 
 /**
   * @Author yyb
@@ -18,8 +15,9 @@ import org.apache.flink.streaming.api.scala._
   * @Date Create in 2020-04-18
   * @Time 17:40
   */
-object WordCountFileSourceStreamFileSinkOfParquet {
+object WordCountFileSourceStreamFileSinkOfParquetToHDFS {
   def main(args: Array[String]): Unit = {
+    System.setProperty("HADOOP_USER_NAME", "root")
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     val params = ParameterTool.fromArgs(args)
 
@@ -34,7 +32,7 @@ object WordCountFileSourceStreamFileSinkOfParquet {
       .build()
 
     val fileSourcePath = "/Users/yyb/Downloads/1.txt"
-    val fileSinkPath = "./xxx.text/rs2"
+    val fileSinkPath = "hdfs://ns1/user/yyb/parquet"
 
     val wc = env.readTextFile(fileSourcePath)
       .flatMap(_.split("\\W+"))
@@ -54,7 +52,7 @@ object WordCountFileSourceStreamFileSinkOfParquet {
       .withRollingPolicy(OnCheckpointRollingPolicy.build())
       .build()
 
-    wc.print()
+//    wc.print()
 
     wc.addSink(parquetSink).setParallelism(1)
 
@@ -63,4 +61,5 @@ object WordCountFileSourceStreamFileSinkOfParquet {
   }
 
   case class WC(word:String, ct:Int)
+
 }

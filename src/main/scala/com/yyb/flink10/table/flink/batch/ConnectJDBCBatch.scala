@@ -1,13 +1,17 @@
 package com.yyb.flink10.table.flink.batch
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.java.io.jdbc.JDBCInputFormat
+import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink
 import org.apache.flink.api.java.io.jdbc.JDBCInputFormat.JDBCInputFormatBuilder
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.typeutils.Types
+import org.apache.flink.formats.parquet.ParquetTableSource
 import org.apache.flink.table.api.scala.BatchTableEnvironment
+import org.apache.flink.table.descriptors.{BatchTableDescriptor, FileSystem}
+import org.apache.flink.table.sinks.CsvTableSink
+import org.apache.flink.table.sources.{CsvTableSource, TableSource}
 import org.apache.flink.types.Row
 
 /**
@@ -38,7 +42,22 @@ object ConnectJDBCBatch {
 
     mysqlSource.print()
 
+//    val table: ParquetTableSource = new ParquetTableSource()
+//    batchTableEnv.registerTableSource("table", table)
 
+    val file = new FileSystem() //注意这里只是 实验性质
+    val fs: BatchTableDescriptor =  batchTableEnv.connect(file)
+
+//    val jdbcTableSink = new JDBCAppendTableSink()
+//    batchTableEnv.registerTableSink("jdbcTableSink", jdbcTableSink)
+
+
+    val csvTableSink = new CsvTableSink("")
+    batchTableEnv.registerTableSink("csvTableSink", csvTableSink)
+
+
+
+    //目前来看，只有在 有 sink的情况下，需要 加 execute
 //    batchTableEnv.execute("ConnectJDBCBatch")
   }
 }

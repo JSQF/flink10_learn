@@ -9,7 +9,7 @@ stream存放 流代码的包
 ## flink parquet
 1. 增加 flink-parquet maven 依赖 需要添加 flink-parquet 和 parquet-avro 依赖
 2. batch 模式下 没有找到可以写 parquet 文件的方法，stream 模式下 可以通过 StreamingFileSink 的 Bulk-encoded Formats 输出 parquet文件
-3. 目前 没有找到 类似 spark 读 parquet 文件 的类似方式
+3. 目前 没有找到 类似 spark 读 parquet 文件 的类似方式 [在 flink 1.11.0 会释放出来](https://issues.apache.org/jira/browse/FLINK-16951)
 
 
 ## Checkpointing
@@ -123,6 +123,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 1. idea 本地运行 提示 缺包问题。修改 pom文件 dependency 的 scope 范围，可以直接注释掉这个 选项
 ### batch 程序 有的 地方不执行的问题
 1. batch 程序 有的地方没有执行，可能你的程序 最后没有调用 env.execution() 方法
+2. 目前来看，只有在 有 sink的情况下，需要 加 env.execution() 方法
 
 
 ## Flink10 BUG
