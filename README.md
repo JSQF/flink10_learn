@@ -92,7 +92,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 2. 可以把 Table 转化到 DateStream
 
 ### Blink Batch Table
-1. 可以从 DateSet 转化到 Table
+1. 不能 DateSet 转化到 Table
 2. 目前还未找到 Table 转化为 DateSet的 方式  [原因点击查看,位于 Table & SQL 的 注意 第一条](#reson1)
 3. hive 操作。
 #### Blibk Hive DDL
@@ -124,6 +124,8 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 ### batch 程序 有的 地方不执行的问题
 1. batch 程序 有的地方没有执行，可能你的程序 最后没有调用 env.execution() 方法
 2. 目前来看，只有在 有 sink的情况下，需要 加 env.execution() 方法
+### 在自己的 JOb 后面有 env.execution() 的时候，有时候运行JOb会保存  
+这个原因是，只有在有 Sink 的时候，才需要调用 env.execution() 这个方法。
 
 
 ## Flink10 BUG

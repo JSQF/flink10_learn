@@ -1,14 +1,12 @@
-package com.yyb.flink10.table.flink.stream
+package com.yyb.flink10.table.flink.stream.JDBC
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.io.jdbc.JDBCInputFormat.JDBCInputFormatBuilder
 import org.apache.flink.api.java.typeutils.RowTypeInfo
-import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.api.scala.typeutils.Types
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, _}
 import org.apache.flink.table.api.Table
-import org.apache.flink.table.api.scala.{BatchTableEnvironment, StreamTableEnvironment}
-import org.apache.flink.table.descriptors.BatchTableDescriptor
+import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.types.Row
 
 /**
@@ -17,7 +15,7 @@ import org.apache.flink.types.Row
   * @Date Create in 2020-04-21
   * @Time 14:15
   */
-object ConnectJDBCStream {
+object StreamJDBCReadByInputformat2TableSource {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     val streamTableEnv = StreamTableEnvironment.create(env)

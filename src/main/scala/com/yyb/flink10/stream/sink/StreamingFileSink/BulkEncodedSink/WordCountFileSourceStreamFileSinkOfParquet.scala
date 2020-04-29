@@ -1,4 +1,4 @@
-package com.yyb.flink10.stream.StreamingFileSink.BulkEncodedSink
+package com.yyb.flink10.stream.sink.StreamingFileSink.BulkEncodedSink
 
 import com.yyb.flink10.sink.ParquetWriterSink
 import org.apache.avro.reflect.ReflectData
@@ -24,6 +24,7 @@ import org.apache.parquet.hadoop.metadata.CompressionCodecName
   */
 object WordCountFileSourceStreamFileSinkOfParquet {
   def main(args: Array[String]): Unit = {
+    System.setProperty("HADOOP_USER_NAME", "yyb")
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     val params = ParameterTool.fromArgs(args)
 
@@ -40,7 +41,7 @@ object WordCountFileSourceStreamFileSinkOfParquet {
     val fileSourcePath = "./data/data.txt"
     val fileSinkPath = "./xxx.text/rs2"
     val fileSinkPath1 = "./xxx.text/rs3"
-    val fileSinkPath2 = "./xxx.text/rs4"
+    val fileSinkPath2 = "file:///Users/yyb/ScalaSource/flink10_learn/xxx.text/rs4"
 
     val wc = env.readTextFile(fileSourcePath)
       .flatMap(_.split("\\W+"))
@@ -52,7 +53,8 @@ object WordCountFileSourceStreamFileSinkOfParquet {
       val simleSink = StreamingFileSink.forRowFormat(new Path(fileSinkPath), new SimpleStringEncoder[WC]())
       .build()
 
-    val parquetSink = StreamingFileSink.forBulkFormat(new Path(fileSinkPath),
+    // 注意在使用这种方式的 parquet sink 与 一次运行的 dataStream 配合的时候，一般会出现 parquet文件没有写完整的问题
+    val parquetSink: StreamingFileSink[WC] = StreamingFileSink.forBulkFormat(new Path(fileSinkPath),
       ParquetAvroWriters.forReflectRecord(classOf[WC]))
 //      .withNewBucketAssigner(new BasePathBucketAssigner())
 //      .withOutputFileConfig(fileOutputCofig)
@@ -62,20 +64,7 @@ object WordCountFileSourceStreamFileSinkOfParquet {
 
     wc.print()
 
-    wc.addSink(parquetSink).setParallelism(1)
-
-//    val parquetSink = StreamingFileSink.forBulkFormat(new Path(fileSinkPath),
-//      ParquetAvroWriters.forReflectRecord(classOf[WC]))
-////      .withNewBucketAssigner(new BasePathBucketAssigner())
-////      .withOutputFileConfig(fileOutputCofig)
-////      .withRollingPolicy(OnCheckpointRollingPolicy.build())
-//      .withBucketCheckInterval(10)
-//      .build()
-
-
-//    val txtSink: StreamingFileSink[WC] = StreamingFileSink.forRowFormat(new Path(fileSinkPath1),
-//      new SimpleStringEncoder[WC]()
-//    ).build()
+//    wc.addSink(parquetSink).setParallelism(1)
 
     val parquetSinkmy = new ParquetWriterSink[WC](fileSinkPath2,
       ReflectData.get.getSchema(classOf[WC]).toString,

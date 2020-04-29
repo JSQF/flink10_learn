@@ -1,17 +1,14 @@
-package com.yyb.flink10.table.flink.batch
+package com.yyb.flink10.table.flink.batch.JDBC
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink
 import org.apache.flink.api.java.io.jdbc.JDBCInputFormat.JDBCInputFormatBuilder
 import org.apache.flink.api.java.typeutils.RowTypeInfo
-import org.apache.flink.api.scala.ExecutionEnvironment
-import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.typeutils.Types
-import org.apache.flink.formats.parquet.ParquetTableSource
+import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.scala.BatchTableEnvironment
 import org.apache.flink.table.descriptors.{BatchTableDescriptor, FileSystem}
 import org.apache.flink.table.sinks.CsvTableSink
-import org.apache.flink.table.sources.{CsvTableSource, TableSource}
 import org.apache.flink.types.Row
 
 /**
@@ -20,7 +17,7 @@ import org.apache.flink.types.Row
   * @Date Create in 2020-04-21
   * @Time 14:15
   */
-object ConnectJDBCBatch {
+object BatchJDBCReadByInputformat2TableSource {
   def main(args: Array[String]): Unit = {
     val env = ExecutionEnvironment.getExecutionEnvironment
     val batchTableEnv = BatchTableEnvironment.create(env)
@@ -53,7 +50,16 @@ object ConnectJDBCBatch {
 
 
     val csvTableSink = new CsvTableSink("")
-    batchTableEnv.registerTableSink("csvTableSink", csvTableSink)
+//    batchTableEnv.registerTableSink("csvTableSink", csvTableSink)
+
+    val AUX_TABLE: Table =  batchTableEnv.fromDataSet(mysqlSource)
+    batchTableEnv.createTemporaryView("AUX_TABLE", AUX_TABLE)
+
+    val sql =
+      s"""
+         |select * from AUX_TABLE
+       """.stripMargin
+    batchTableEnv.sqlQuery(sql).printSchema()
 
 
 

@@ -1,6 +1,6 @@
-package com.yyb.flink10.stream.StreamingFileSink.BulkEncodedSink
+package com.yyb.flink10.stream.sink.StreamingFileSink.BulkEncodedSink
 
-import com.yyb.flink10.stream.StreamingFileSink.BulkEncodedSink.WordCountFileSourceStreamFileSinkOfParquet.WC
+import com.yyb.flink10.stream.sink.StreamingFileSink.BulkEncodedSink.WordCountFileSourceStreamFileSinkOfParquet.WC
 import org.apache.flink.api.java.tuple
 import org.apache.hadoop.conf.Configuration
 import org.apache.flink.api.java.utils.ParameterTool

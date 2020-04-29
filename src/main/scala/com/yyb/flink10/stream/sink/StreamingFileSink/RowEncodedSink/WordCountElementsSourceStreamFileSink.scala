@@ -1,4 +1,4 @@
-package com.yyb.flink10.stream.StreamingFileSink.RowEncodedSink
+package com.yyb.flink10.stream.sink.StreamingFileSink.RowEncodedSink
 
 import com.yyb.flink10.stream.data.WordCountData
 import org.apache.flink.api.common.serialization.SimpleStringEncoder

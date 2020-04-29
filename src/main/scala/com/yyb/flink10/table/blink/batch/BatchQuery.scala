@@ -22,7 +22,7 @@ object BatchQuery {
 
     val stringField = new AtomicDataType(new VarCharType(50))
     val intField = new AtomicDataType(new IntType)
-    val csvTableSource =  CsvTableSource.builder()
+    val csvTableSource: CsvTableSource =  CsvTableSource.builder()
       .path(sourceFIlePath)
       .field("word", stringField)
 //      .field("word", Types.STRING) //方法已压制

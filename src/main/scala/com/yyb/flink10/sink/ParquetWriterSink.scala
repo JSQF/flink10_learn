@@ -1,6 +1,7 @@
 package com.yyb.flink10.sink
 
 import org.apache.avro.Schema
+import org.apache.avro.reflect.ReflectData
 import org.apache.flink.configuration.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
@@ -18,8 +19,9 @@ class ParquetWriterSink[IN](val path: String, val schema: String, val compressio
 //      .withPageSize(config.pageSize)
 //      .withRowGroupSize(config.blockSize)
 //      .withDictionaryEncoding(config.enableDictionary)
-//      .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
+      .withWriteMode(ParquetFileWriter.Mode.OVERWRITE)
 //      .withValidation(config.validating)
+        .withDataModel(ReflectData.get)
       .build()
   }
 
