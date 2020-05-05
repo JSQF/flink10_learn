@@ -1,4 +1,4 @@
-package com.yyb.flink10.stream.sink.jdbc
+package com.yyb.flink10.stream.sink.JDBC
 
 import com.yyb.flink10.stream.data.WordCountData
 import org.apache.flink.api.java.io.jdbc.{JDBCAppendTableSink, JDBCOutputFormat, JDBCSinkFunction}

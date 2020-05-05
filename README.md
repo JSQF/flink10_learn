@@ -24,9 +24,9 @@ stream存放 流代码的包
 ###### Batch By JDBCInputFormat
 1. 需要maven依赖 flink-jdbc_2.11、mysql-connector-java  
 2. 编写代码时候需要 自己 指定 字段名称和类型  
-[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/jdbc/ReadFromJDBCInputFormat.scala)
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/JDBC/ReadFromJDBCInputFormat.scala)
 ###### Stream By JDBCInputFormat  
-[查看示例](./src/main/scala/com/yyb/flink10/stream/sink/ReadFromInputFormat.scala)  
+[查看示例](./src/main/scala/com/yyb/flink10/stream/sink/JDBC/ReadFromInputFormat.scala)  
 ###### Flink table & sql Batch By JDBCInputFormat
 ###### Flink table & sql Batch By JDBCTableSource
 ###### Blink table & sql Batch By JDBCInputFormat
