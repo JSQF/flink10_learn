@@ -1,4 +1,4 @@
-package com.yyb.flink10.batch.jdbc
+package com.yyb.flink10.batch.JDBC
 
 import com.yyb.flink10.stream.data.WordCountData
 import com.yyb.flink10.stream.parquet.WriteParquetWordCount.WORDCOUNT
