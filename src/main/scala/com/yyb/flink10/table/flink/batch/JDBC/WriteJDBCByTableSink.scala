@@ -31,7 +31,7 @@ object WriteJDBCByTableSink {
     batchTableEnv.createTemporaryView("wordcount", table)
 
 
-    val jdbcAppendTableSink = JDBCAppendTableSink.builder()
+    val jdbcAppendTableSink: JDBCAppendTableSink = JDBCAppendTableSink.builder()
         .setBatchSize(2000)
       .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
       .setDrivername("com.mysql.jdbc.Driver")

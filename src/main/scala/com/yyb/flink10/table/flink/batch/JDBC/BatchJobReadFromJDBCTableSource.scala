@@ -42,7 +42,7 @@ object BatchJobReadFromJDBCTableSource {
         .field("time", new AtomicDataType(new DateType))
         .build()
 
-    val jdbcTableSource =  JDBCTableSource.builder()
+    val jdbcTableSource: JDBCTableSource =  JDBCTableSource.builder()
       .setLookupOptions(lookOption)
       .setOptions(jdbcOpition)
       .setReadOptions(jdbcReadOption)

@@ -1,6 +1,7 @@
 package com.yyb.flink10.table.flink.batch.JDBC
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.java.io.jdbc.JDBCInputFormat
 import org.apache.flink.api.java.io.jdbc.JDBCInputFormat.JDBCInputFormatBuilder
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.api.scala.typeutils.Types
@@ -27,7 +28,7 @@ object BatchJDBCReadByInputformat2TableSource {
     val typeInfo = new RowTypeInfo(types, fields)
 
 
-    val jdbc = new JDBCInputFormatBuilder()
+    val jdbc: JDBCInputFormat = new JDBCInputFormatBuilder()
         .setDBUrl("jdbc:mysql://127.0.0.1:3306/hive?useSSL=false&serverTimezone=UTC")
         .setDrivername("com.mysql.jdbc.Driver")
         .setUsername("hive")

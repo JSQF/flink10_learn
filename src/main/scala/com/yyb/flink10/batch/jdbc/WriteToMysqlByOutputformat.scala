@@ -25,7 +25,7 @@ object WriteToMysqlByOutputformat {
       .sum(1)
     val countRecord: DataSet[Row] = counts.map(x =>  Row.of(x.word, x.count.asInstanceOf[Integer]))
 
-    val mysqlOutput = JDBCOutputFormat.buildJDBCOutputFormat()
+    val mysqlOutput: JDBCOutputFormat = JDBCOutputFormat.buildJDBCOutputFormat()
       .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
       .setDrivername("com.mysql.jdbc.Driver")
       .setUsername("root")

@@ -20,10 +20,21 @@ stream存放 流代码的包
 ### Generic
 #### readFile
 #### createInput
-##### read from JDBC
+##### read from JDBC 
+###### Batch By JDBCInputFormat
 1. 需要maven依赖 flink-jdbc_2.11、mysql-connector-java  
 2. 编写代码时候需要 自己 指定 字段名称和类型  
-[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/ConnectJDBCBatch.scala)
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/jdbc/ReadFromJDBCInputFormat.scala)
+###### Stream By JDBCInputFormat  
+[查看示例](./src/main/scala/com/yyb/flink10/stream/sink/ReadFromInputFormat.scala)  
+###### Flink table & sql Batch By JDBCInputFormat
+###### Flink table & sql Batch By JDBCTableSource
+###### Blink table & sql Batch By JDBCInputFormat
+###### Blink table & sql Batch By JDBCTableSource
+###### Flink table & sql Stream By JDBCInputFormat
+###### Flink table & sql Stream By JDBCTableSource
+###### Blink table & sql Stream By JDBCInputFormat
+###### Blink table & sql Stream By JDBCTableSource
 
 ## Sink
 ### StreamingFileSink format
@@ -70,7 +81,16 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 通过 调用 .withBucketAssigner(assigner) on the format builders.
 
 这一部分是配置 输出文件的 前后缀的：
-可以是调用 .withOutputFileConfig(config) 和 OutputFileConfig 结合 配置 输出文件的 前后缀的。
+可以是调用 .withOutputFileConfig(config) 和 OutputFileConfig 结合 配置 输出文件的 前后缀的。  
+
+### Sinks
+#### JDBCSink
+##### Batch By JDBCOutputFormat
+##### Stream By JDBCOutputFormat
+##### Flink table & sql Batch By JDBCAppendTableSink
+##### Flink table & sql Stream By JDBCAppendTableSink
+##### Blink table & sql Batch By JDBCAppendTableSink
+##### Blink table & sql Stream By JDBCAppendTableSink
 
 ## Table & SQL
 注意 Blink 和 Flink 在 Table&SQL 中的区别：
