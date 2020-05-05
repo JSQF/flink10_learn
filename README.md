@@ -1,6 +1,6 @@
 # Flinl10_learn
 主要用于学习 flink 10 版本的目的   
-[github 地址](https://github.com/JSQF/flink10_learn)
+[github 地址](https://github.com/JSQF/flink10_learn)  
 [码云 地址](https://gitee.com/jsqf/flink10_learn)
 ## 包目录介绍
 batch存放 批代码的包
