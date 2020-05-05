@@ -4,3 +4,4 @@ target/
 xxx.text/
 metastore_db/
 *.log
+derby.log
