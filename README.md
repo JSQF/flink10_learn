@@ -1,7 +1,7 @@
 # Flinl10_learn
 主要用于学习 flink 10 版本的目的   
 [github 地址](https://github.com/JSQF/flink10_learn)  
-[码云 地址](https://gitee.com/jsqf/flink10_learn)
+[码云 地址](https://gitee.com/jsqf/flink10_learn)  
 ## 包目录介绍
 batch存放 批代码的包
 
@@ -18,10 +18,20 @@ stream存放 流代码的包
 
 ## Source
 ### File-based
+####readTextFile(path) / TextInputFormat - Reads files line wise and returns them as Strings.
+####readTextFileWithValue(path) / TextValueInputFormat - Reads files line wise and returns them as StringValues. StringValues are mutable strings.
+####readCsvFile(path) / CsvInputFormat - Parses files of comma (or another char) delimited fields. Returns a DataSet of tuples, case class objects, or POJOs. Supports the basic java types and their Value counterparts as field types.
+####readFileOfPrimitives(path, delimiter) / PrimitiveInputFormat - Parses files of new-line (or another char sequence) delimited primitive data types such as String or Integer using the given delimiter.
+####readSequenceFile(Key, Value, path) / SequenceFileInputFormat - Creates a JobConf and reads file from the specified path with type SequenceFileInputFormat, Key class and Value class and returns them as Tuple2<Key, Value>.
 ### Collection-based
+####fromCollection(Iterable) - Creates a data set from an Iterable. All elements returned by the Iterable must be of the same type.
+####fromCollection(Iterator) - Creates a data set from an Iterator. The class specifies the data type of the elements returned by the iterator.
+####fromElements(elements: _*) - Creates a data set from the given sequence of objects. All objects must be of the same type.
+####fromParallelCollection(SplittableIterator) - Creates a data set from an iterator, in parallel. The class specifies the data type of the elements returned by the iterator.
+####generateSequence(from, to) - Generates the sequence of numbers in the given interval, in parallel.
 ### Generic
-#### readFile
-#### createInput
+####readFile(inputFormat, path) / FileInputFormat - Accepts a file input format.
+####createInput
 ##### read from JDBC 
 ###### Batch By JDBCInputFormat
 1. 需要maven依赖 flink-jdbc_2.11、mysql-connector-java  
@@ -30,13 +40,21 @@ stream存放 流代码的包
 ###### Stream By JDBCInputFormat  
 [查看示例](./src/main/scala/com/yyb/flink10/stream/sink/JDBC/ReadFromInputFormat.scala)  
 ###### Flink table & sql Batch By JDBCInputFormat
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/JDBC/BatchJDBCReadByInputformat2TableSource.scala)
 ###### Flink table & sql Batch By JDBCTableSource
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/JDBC/BatchJobReadFromJDBCTableSource.scala)
 ###### Blink table & sql Batch By JDBCInputFormat
+  
 ###### Blink table & sql Batch By JDBCTableSource
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/JDBC/BlinkBatchReadFromJDBCTableSource.scala)
 ###### Flink table & sql Stream By JDBCInputFormat
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/stream/JDBC/StreamJDBCReadByInputformat2TableSource.scala)
 ###### Flink table & sql Stream By JDBCTableSource
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/stream/JDBC/StreamJobReadFromJDBCTableSource.scala)
 ###### Blink table & sql Stream By JDBCInputFormat
+  
 ###### Blink table & sql Stream By JDBCTableSource
+[查看示例](./src/main/scala/com/yyb/flink10/table/blink/stream/JDBC/ReadDataFromJDBCTableSource.scala)
 
 ## Sink
 ### StreamingFileSink format
@@ -88,11 +106,17 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 ### Sinks
 #### JDBCSink
 ##### Batch By JDBCOutputFormat
-##### Stream By JDBCOutputFormat
+[查看示例](./src/main/scala/com/yyb/flink10/batch/JDBC/WriteToMysqlByOutputformat.scala)  
+##### Stream By JDBCOutputFormat  
+[查看示例](./src/main/scala/com/yyb/flink10/stream/sink/JDBC/WriteToMysqlByJDBCOutputformat.scala)  
 ##### Flink table & sql Batch By JDBCAppendTableSink
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/JDBC/WriteJDBCByTableSink.scala)
 ##### Flink table & sql Stream By JDBCAppendTableSink
+[查看示例](./src/main/scala/com/yyb/flink10/table/flink/batch/JDBC/WriteDataByTableSink.scala)
 ##### Blink table & sql Batch By JDBCAppendTableSink
+[查看示例](./src/main/scala/com/yyb/flink10/table/blink/batch/JDBC/BlinkBatchWriteToJDBCTableSink.scala)
 ##### Blink table & sql Stream By JDBCAppendTableSink
+[查看示例](./src/main/scala/com/yyb/flink10/table/blink/stream/JDBC/WriteDataByJDBCTableSink.scala)
 
 ## Table & SQL
 注意 Blink 和 Flink 在 Table&SQL 中的区别：
@@ -137,6 +161,7 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 #### Filesystem
 #### Elasticsearch
 #### Apache Kafka
+
 #### HBase
 #### JDBC
 

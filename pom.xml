@@ -50,6 +50,7 @@ under the License.
 		<scala.version>2.11.8</scala.version>
         <hive.version>2.3.6</hive.version>
         <jdo.version>3.2.0-m3</jdo.version>
+		<kafka.version>0.10</kafka.version>
 	</properties>
 
 	<dependencies>
@@ -233,6 +234,11 @@ under the License.
         </dependency>
         <!-- connect jdbc end -->
 
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-sql-connector-kafka-${kafka.version}_${scala.binary.version}</artifactId>
+			<version>${flink.version}</version>
+		</dependency>
 
 	</dependencies>
 
