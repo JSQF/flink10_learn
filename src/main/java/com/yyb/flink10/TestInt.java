@@ -36,4 +36,9 @@ public class TestInt {
             System.out.println(a[i]);
         }
     }
+
+    public static String xxx(){
+        String a = "xxx";
+        return a;
+    }
 }
