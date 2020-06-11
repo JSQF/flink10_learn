@@ -2,6 +2,7 @@ package com.yyb.flink10.table.blink.stream.kafka;
 
 
 import com.yyb.flink10.commonEntity.Pi;
+import com.yyb.flink10.util.GeneratorClassByASM;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
@@ -22,9 +23,15 @@ import org.apache.flink.table.descriptors.Schema;
   */
 public class ReadDataFromKafkaConnectorJava {
   public static void main(String[] args) throws Exception {
+    String packageName = "com.yyb.flink10.xxx.";
+    String className = "Pi";
+    Class pi =  GeneratorClassByASM.getPiClass(packageName, className);
+    Class piCLass = Class.forName(packageName + className);
     EnvironmentSettings settings = EnvironmentSettings.newInstance().useOldPlanner().inStreamingMode().build();
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     StreamTableEnvironment flinkTableEnv = StreamTableEnvironment.create(env, settings);
+
+//    env.registerType(pi);
 
     Kafka kafka = new Kafka();
     kafka.version("0.11")
@@ -50,7 +57,11 @@ public class ReadDataFromKafkaConnectorJava {
     test.printSchema();
 
 
-    DataStream<Pi> testDataStream = flinkTableEnv.toAppendStream(test, Pi.class);
+//    DataStream<Pi> testDataStream = flinkTableEnv.toAppendStream(test, Pi.class);
+
+//    Class.forName(pi.getName(), true, GeneratorClassByASM.cl).newInstance();
+//    System.out.println(pi.getName());
+    DataStream<Pi> testDataStream = flinkTableEnv.toAppendStream(test, piCLass);
 
     testDataStream.print().setParallelism(1);
 
