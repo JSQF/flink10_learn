@@ -60,13 +60,13 @@ under the License.
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-scala_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
-			<!--<scope>provided</scope>-->
+			<scope>${slef.scope}</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
-			<!--<scope>provided</scope>-->
+			<scope>${slef.scope}</scope>
 		</dependency>
 
 		<!-- Scala Library, provided by Flink as well. -->
@@ -108,6 +108,7 @@ under the License.
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-parquet_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
+			<scope>${slef.scope}</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.parquet</groupId>
@@ -120,19 +121,20 @@ under the License.
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-sequence-file</artifactId>
             <version>1.10.0</version>
+			<scope>${slef.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-hadoop-compatibility_2.11</artifactId>
             <version>1.10.0</version>
-            <scope>compile</scope>
+			<scope>${slef.scope}</scope>
         </dependency>
 
         <!-- flink 2 hadoop -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
-            <scope>compile</scope>
+			<scope>${slef.scope}</scope>
             <version>2.9.2</version>
         </dependency>
         <!-- Hadoop SequenceFile need  end -->
@@ -144,31 +146,31 @@ under the License.
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-java-bridge_2.11</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>${slef.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-scala-bridge_2.11</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>${slef.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner_2.11</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>${slef.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner-blink_2.11</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <scope>${slef.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>${slef.scope}</scope>
         </dependency>
         <!-- flink table & sql end -->
 
@@ -178,12 +180,13 @@ under the License.
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-hive_2.11</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>${slef.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-exec</artifactId>
             <version>${hive.version}</version>
+			<scope>${slef.scope}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.hive</groupId>
@@ -231,6 +234,7 @@ under the License.
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-jdbc_2.11</artifactId>
             <version>${flink.version}</version>
+			<scope>${slef.scope}</scope>
         </dependency>
         <!-- connect jdbc end -->
 
@@ -238,6 +242,7 @@ under the License.
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-sql-connector-kafka-${kafka.version}_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
+			<scope>compile</scope>
 		</dependency>
 
 
@@ -245,7 +250,9 @@ under the License.
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-json</artifactId>
 			<version>${flink.version}</version>
+			<scope>compile</scope>
 		</dependency>
+
 
 	</dependencies>
 
@@ -384,4 +391,22 @@ under the License.
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<slef.scope>compile</slef.scope>
+			</properties>
+		</profile>
+		<profile>
+			<id>prd</id>
+			<properties>
+				<slef.scope>provided</slef.scope>
+			</properties>
+		</profile>
+	</profiles>
 </project>
