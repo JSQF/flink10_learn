@@ -18,6 +18,7 @@ import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
 
 /**
+  * 注意 这里 涉及到了 ASM 动态产生 class  并加载的 内容，可以参考 https://blog.csdn.net/u010374412/article/details/106714721 博文
   * @Author yyb
   * @Description
   * @Date Create in 2020-06-10
