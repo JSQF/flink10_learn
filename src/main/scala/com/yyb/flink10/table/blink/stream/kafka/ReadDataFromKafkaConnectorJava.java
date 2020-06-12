@@ -1,8 +1,10 @@
 package com.yyb.flink10.table.blink.stream.kafka;
 
 
+import com.yyb.flink10.LoadClassByClassloader;
 import com.yyb.flink10.commonEntity.Pi;
 import com.yyb.flink10.util.GeneratorClassByASM;
+import net.sf.cglib.core.ReflectUtils;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
@@ -25,8 +27,11 @@ public class ReadDataFromKafkaConnectorJava {
   public static void main(String[] args) throws Exception {
     String packageName = "com.yyb.flink10.xxx.";
     String className = "Pi";
-    Class pi =  GeneratorClassByASM.getPiClass(packageName, className);
-    Class piCLass = Class.forName(packageName + className);
+    byte[] byteOfClass = GeneratorClassByASM.geneClassMain(packageName, className);
+    Class piCLass = ReflectUtils.defineClass(packageName + className, byteOfClass, ReadDataFromKafkaConnectorJava.class.getClassLoader());
+    Class<?> xx = Class.forName(packageName + className);
+    System.out.println(xx.newInstance());
+
     EnvironmentSettings settings = EnvironmentSettings.newInstance().useOldPlanner().inStreamingMode().build();
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     StreamTableEnvironment flinkTableEnv = StreamTableEnvironment.create(env, settings);
