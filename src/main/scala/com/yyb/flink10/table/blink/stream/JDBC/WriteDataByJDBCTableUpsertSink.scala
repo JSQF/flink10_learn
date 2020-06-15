@@ -1,7 +1,5 @@
 package com.yyb.flink10.table.blink.stream.JDBC
 
-import com.sun.jdi.LongType
-import org.apache.flink.api.common.typeinfo.BasicTypeInfo
 import org.apache.flink.api.java.io.jdbc.{JDBCAppendTableSink, JDBCOptions, JDBCUpsertTableSink}
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, _}
 import org.apache.flink.table.api.scala.StreamTableEnvironment

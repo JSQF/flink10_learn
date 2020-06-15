@@ -4,6 +4,10 @@ import scala.tools.asm.ClassWriter;
 import scala.tools.asm.MethodVisitor;
 import scala.tools.asm.Opcodes;
 import scala.tools.asm.Type;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import static scala.tools.asm.Opcodes.*;
@@ -121,7 +125,7 @@ public class GeneratorClassByASM {
         ClassWriter cw = new ClassWriter(0);
         // 定义对象头：版本号、修饰符、全类名、签名、父类、实现的接口
         cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, packageName1 + className,
-                null, "java/lang/Object", null);
+                null, "java/lang/Object", new String[]{"java/io/Serializable"});
         generatorInitmethos(cw);
         generatorFields(cw, "id", String.class);
         generatorFields(cw, "time", String.class);
@@ -131,6 +135,19 @@ public class GeneratorClassByASM {
         generatorGetMethod(cw, "time", String.class, packageName1, className);
         cw.visitEnd();
         return cw.toByteArray();
+    }
+
+    public static void saveToFile(byte[] classBytes, String path) throws Exception {
+        File file = new File(path);
+        if(!file.getParentFile().exists()){
+            file.mkdirs();
+        }
+        if(file.exists()){
+            file.delete();
+        }
+        FileOutputStream fo = new FileOutputStream(file);
+        fo.write(classBytes);
+        fo.close();
     }
 
     public static void main(String[] args) throws Exception {

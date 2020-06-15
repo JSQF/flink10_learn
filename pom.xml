@@ -26,7 +26,7 @@ under the License.
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Flink Quickstart Job</name>
+	<name>flink10_learn</name>
 	<url>http://www.myorganization.org</url>
 
 	<repositories>
@@ -51,6 +51,7 @@ under the License.
         <hive.version>2.3.6</hive.version>
         <jdo.version>3.2.0-m3</jdo.version>
 		<kafka.version>0.11</kafka.version>
+		<maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -315,24 +316,24 @@ under the License.
 			</plugin>
 
 			<!-- Scala Compiler -->
-<!--			<plugin>-->
-<!--				<groupId>net.alchim31.maven</groupId>-->
-<!--				<artifactId>scala-maven-plugin</artifactId>-->
-<!--				<version>3.2.2</version>-->
-<!--				<executions>-->
-<!--					<execution>-->
-<!--						<goals>-->
-<!--							<goal>compile</goal>-->
-<!--							<goal>testCompile</goal>-->
-<!--						</goals>-->
-<!--					</execution>-->
-<!--				</executions>-->
-<!--				<configuration>-->
-<!--					<args>-->
-<!--						<arg>-nobootcp</arg>-->
-<!--					</args>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
+			<!--			<plugin>-->
+			<!--				<groupId>net.alchim31.maven</groupId>-->
+			<!--				<artifactId>scala-maven-plugin</artifactId>-->
+			<!--				<version>3.2.2</version>-->
+			<!--				<executions>-->
+			<!--					<execution>-->
+			<!--						<goals>-->
+			<!--							<goal>compile</goal>-->
+			<!--							<goal>testCompile</goal>-->
+			<!--						</goals>-->
+			<!--					</execution>-->
+			<!--				</executions>-->
+			<!--				<configuration>-->
+			<!--					<args>-->
+			<!--						<arg>-nobootcp</arg>-->
+			<!--					</args>-->
+			<!--				</configuration>-->
+			<!--			</plugin>-->
 
 			<!-- Eclipse Scala Integration -->
 			<plugin>
@@ -397,6 +398,7 @@ under the License.
 			</plugin>
 		</plugins>
 	</build>
+
 
 	<profiles>
 		<profile>
