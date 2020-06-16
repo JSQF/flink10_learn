@@ -3,6 +3,8 @@ package com.yyb.flink10.table.blink.stream.kafka;
 
 import com.yyb.flink10.util.GeneratorClassByASM;
 import net.sf.cglib.core.ReflectUtils;
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
+import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
@@ -27,28 +29,23 @@ import java.util.Properties;
   */
 public class ReadDataFromKafkaConnectorJava {
   public static void main(String[] args) throws Exception {
+
+    /**
+     * 这里是 ASM 生产 动态 class 类，不用理会。
+     */
     String packageName = "com.yyb.flink10.xxx.";
     String className = "Pi";
     byte[] byteOfClass = GeneratorClassByASM.geneClassMain(packageName, className);
-    InputStream propstream = ReadDataFromKafkaConnectorJava.class.getResourceAsStream("/env.properties");
-    Properties prop = new Properties();
-    prop.load(propstream);
-
-    String envString = prop.getProperty("env");
-    if("prd".equalsIgnoreCase(envString)){
-//      System.out.println(prop.getProperty("path"));
-      GeneratorClassByASM.saveToFile(byteOfClass, prop.getProperty("path"));
-    }
-
-
     Class piCLass = ReflectUtils.defineClass(packageName + className, byteOfClass, ReadDataFromKafkaConnectorJava.class.getClassLoader());
     Class<?> xx = Class.forName(packageName + className);
     System.out.println(xx.newInstance());
 
+
     EnvironmentSettings settings = EnvironmentSettings.newInstance().useOldPlanner().inStreamingMode().build();
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-    StreamTableEnvironment flinkTableEnv = StreamTableEnvironment.create(env, settings);
+    env.registerType(piCLass);
 
+    StreamTableEnvironment flinkTableEnv = StreamTableEnvironment.create(env, settings);
 
 
     Kafka kafka = new Kafka();
@@ -75,12 +72,9 @@ public class ReadDataFromKafkaConnectorJava {
     test.printSchema();
 
 
-//    DataStream<Pi> testDataStream = flinkTableEnv.toAppendStream(test, Pi.class);
-
-//    Class.forName(pi.getName(), true, GeneratorClassByASM.cl).newInstance();
-//    System.out.println(pi.getName());
-
-    DataStream testDataStream = flinkTableEnv.toAppendStream(test, piCLass);
+    TupleTypeInfo tupleTypeInfo = new TupleTypeInfo(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO);
+//    DataStream<?> testDataStream = flinkTableEnv.toAppendStream(test, piCLass); //使用 Class 的方式
+    DataStream testDataStream = flinkTableEnv.toAppendStream(test, tupleTypeInfo);  //使用 TypeInformation 的方式
     testDataStream.print().setParallelism(1);
 
     flinkTableEnv.execute("ReadDataFromKafkaConnector");
