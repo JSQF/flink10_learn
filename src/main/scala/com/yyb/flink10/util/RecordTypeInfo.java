@@ -18,7 +18,9 @@ import java.util.List;
  */
 public class RecordTypeInfo<T> extends CompositeType<T> implements GenericRecord, Comparable<GenericData.Record>  {
 
-    public RecordTypeInfo(Class<T> typeClass){
+//    private final Object[] fields;
+
+    public RecordTypeInfo(Class<T> typeClass, TypeInformation<?>... types){
         super(typeClass);
     }
     @Override
