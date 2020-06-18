@@ -161,7 +161,15 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 #### Filesystem
 #### Elasticsearch
 #### Apache Kafka
-
+1. 需要添加依赖 
+        <dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-sql-connector-kafka-${kafka.version}_${scala.binary.version}</artifactId>
+			<version>${flink.version}</version>
+			<scope>compile</scope>
+		</dependency>
+2. flinkTableEnvrionment connect kafka
+[代码可见](./src/main/scala/com/yyb/flink10/table/blink/stream/kafka/ReadDataFromKafkaConnectorJava.java)  
 #### HBase
 #### JDBC
 

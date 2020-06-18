@@ -72,6 +72,11 @@ public class ReadDataFromKafkaConnectorJava {
     test.printSchema();
 
 
+    /**
+     * 注意 TupleTypeInfoBase 这个 抽象类 有3个直接实现
+     * BaseRowTypeInfo, RowTypeInfo, TupleTypeInfo
+     * 目前这个程序 只是用了 TupleTypeInfo 这个类
+     */
     TupleTypeInfo tupleTypeInfo = new TupleTypeInfo(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO);
 //    DataStream<?> testDataStream = flinkTableEnv.toAppendStream(test, piCLass); //使用 Class 的方式
     DataStream testDataStream = flinkTableEnv.toAppendStream(test, tupleTypeInfo);  //使用 TypeInformation 的方式
