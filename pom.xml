@@ -75,7 +75,7 @@ under the License.
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
 			<version>${scala.version}</version>
-			<scope>provided</scope>
+			<scope>${slef.scope}</scope>
 		</dependency>
 
 		<!-- Add connector dependencies here. They must be in the default scope (compile). -->
@@ -393,6 +393,39 @@ under the License.
 							<sources>
 								<source>src/test/scala</source>
 							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo> ---- Javac Genetor Code ----</echo>
+<!--								<javac srcdir="${basedir}/src/main/scala/com/yyb/flink10/util1/"-->
+<!--									   destdir="${basedir}/target/classes/"-->
+<!--									   debug="on"-->
+<!--									   classpath="/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/:/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/bin/:/Users/yyb/Software/localRepository/org/scala-lang/scala-compiler/2.11.12/scala-compiler-2.11.12.jar"-->
+<!--								/>-->
+								<java classname="com.yyb.flink10.util1.GeneratorClassByASM">
+									<classpath>
+										<pathelement location="/Users/yyb/Software/localRepository/org/scala-lang/scala-compiler/2.11.12/scala-compiler-2.11.12.jar"/>
+										<pathelement location="target/classes"/>
+										<pathelement path="${java.class.path}"/>
+									</classpath>
+								</java>
+
+
+
+							</target>
 						</configuration>
 					</execution>
 				</executions>

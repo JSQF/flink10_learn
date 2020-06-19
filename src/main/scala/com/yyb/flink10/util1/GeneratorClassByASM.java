@@ -1,4 +1,4 @@
-package com.yyb.flink10.util;
+package com.yyb.flink10.util1;
 
 import scala.tools.asm.ClassWriter;
 import scala.tools.asm.MethodVisitor;
@@ -6,7 +6,6 @@ import scala.tools.asm.Opcodes;
 import scala.tools.asm.Type;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -151,10 +150,10 @@ public class GeneratorClassByASM {
     }
 
     public static void main(String[] args) throws Exception {
-//        GeneratorClassByASM generatorClassByASM = new GeneratorClassByASM();
-//        generatorClassByASM.run1();
-
-//        GeneratorClassByASM.getPiClass();
+        String packageName = "com.yyb.flink10.xxx.";
+        String className = "Pi";
+        byte[] byteOfClass = GeneratorClassByASM.geneClassMain(packageName, className);
+        saveToFile(byteOfClass, "./target/classes/" + packageName.replace(".", "/") + className + ".class");
 
     }
 

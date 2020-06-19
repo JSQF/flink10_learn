@@ -1,7 +1,7 @@
 package com.yyb.flink10.table.blink.stream.kafka;
 
 
-import com.yyb.flink10.util.GeneratorClassByASM;
+import com.yyb.flink10.util1.GeneratorClassByASM;
 import net.sf.cglib.core.ReflectUtils;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
@@ -16,9 +16,6 @@ import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
-
-import java.io.InputStream;
-import java.util.Properties;
 
 /**
   * 注意 这里 涉及到了 ASM 动态产生 class  并加载的 内容，可以参考 https://blog.csdn.net/u010374412/article/details/106714721 博文

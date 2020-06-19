@@ -78,7 +78,9 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
         //transfor 2 dataStream
 //        TupleTypeInfo tupleTypeInfo = new TupleTypeInfo(GenericData.Record.class, BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO);
         TupleTypeInfo tupleTypeInfo = new TupleTypeInfo(Tuple2.class, BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO);
+
         DataStream testDataStream = flinkTableEnv.toAppendStream(test, tupleTypeInfo);
+
         testDataStream.print().setParallelism(1);
 
 
