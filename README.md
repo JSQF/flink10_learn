@@ -79,7 +79,10 @@ BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactor
         GenericRecordAvroTypeInfo 这个类来完成转换，否则将会出现 类转化异常  
         这个需要maven加入 flink-avro 依赖。
     3. forReflectRecord(Class<T> type)  这种方式传入也一个 class ；
-    4. [例子可见](./src/main/scala/com/yyb/flink10/table/blink/stream/FileSystem/ReadFromKafkaConnectorWriteToLocalParquetFileJava.java)   
+    4. [例子可见](./src/main/scala/com/yyb/flink10/table/blink/stream/FileSystem/ReadFromKafkaConnectorWriteToLocalParquetFileJava.java)  
+    5. 为什么会对这个方法做这么多说明，因为如果我们想要做一些比较通过的程序，那么势必不应该处处使用到固定的 类， 
+        所以动态根据 配置文件产生 shema的方式 就 显得非常重要了。当然你也可以在运行过程中，利用 ASM 等技术动态产生 class 类对象并加载；  
+        不过在 分布式运行环境下比较难在与master和worker之间的 动态类 共享使用问题。
 2. Hadoop SequenceFileWriterFactory 需要添加依赖 flink-sequence-file、hadoop-client、flink-hadoop-compatibility  
 3. SequenceFileWriterFactory supports additional constructor parameters to specify compression settings  
 
