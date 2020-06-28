@@ -17,23 +17,23 @@ stream存放 流代码的包
 ## Checkpointing
 
 ## Source
-### File-based
-####readTextFile(path) / TextInputFormat - Reads files line wise and returns them as Strings.
-####readTextFileWithValue(path) / TextValueInputFormat - Reads files line wise and returns them as StringValues. StringValues are mutable strings.
-####readCsvFile(path) / CsvInputFormat - Parses files of comma (or another char) delimited fields. Returns a DataSet of tuples, case class objects, or POJOs. Supports the basic java types and their Value counterparts as field types.
-####readFileOfPrimitives(path, delimiter) / PrimitiveInputFormat - Parses files of new-line (or another char sequence) delimited primitive data types such as String or Integer using the given delimiter.
-####readSequenceFile(Key, Value, path) / SequenceFileInputFormat - Creates a JobConf and reads file from the specified path with type SequenceFileInputFormat, Key class and Value class and returns them as Tuple2<Key, Value>.
-### Collection-based
-####fromCollection(Iterable) - Creates a data set from an Iterable. All elements returned by the Iterable must be of the same type.
-####fromCollection(Iterator) - Creates a data set from an Iterator. The class specifies the data type of the elements returned by the iterator.
-####fromElements(elements: _*) - Creates a data set from the given sequence of objects. All objects must be of the same type.
-####fromParallelCollection(SplittableIterator) - Creates a data set from an iterator, in parallel. The class specifies the data type of the elements returned by the iterator.
-####generateSequence(from, to) - Generates the sequence of numbers in the given interval, in parallel.
-### Generic
-####readFile(inputFormat, path) / FileInputFormat - Accepts a file input format.
-####createInput
-##### read from JDBC 
-###### Batch By JDBCInputFormat
+### File-based  
+####readTextFile(path) / TextInputFormat - Reads files line wise and returns them as Strings.  
+####readTextFileWithValue(path) / TextValueInputFormat - Reads files line wise and returns them as StringValues. StringValues are mutable strings.  
+####readCsvFile(path) / CsvInputFormat - Parses files of comma (or another char) delimited fields. Returns a DataSet of tuples, case class objects, or POJOs. Supports the basic java types and their Value counterparts as field types.  
+####readFileOfPrimitives(path, delimiter) / PrimitiveInputFormat - Parses files of new-line (or another char sequence) delimited primitive data types such as String or Integer using the given delimiter.  
+####readSequenceFile(Key, Value, path) / SequenceFileInputFormat - Creates a JobConf and reads file from the specified path with type SequenceFileInputFormat, Key class and Value class and returns them as Tuple2<Key, Value>.  
+### Collection-based  
+####fromCollection(Iterable) - Creates a data set from an Iterable. All elements returned by the Iterable must be of the same type.  
+####fromCollection(Iterator) - Creates a data set from an Iterator. The class specifies the data type of the elements returned by the iterator.  
+####fromElements(elements: _*) - Creates a data set from the given sequence of objects. All objects must be of the same type.  
+####fromParallelCollection(SplittableIterator) - Creates a data set from an iterator, in parallel. The class specifies the data type of the elements returned by the iterator.  
+####generateSequence(from, to) - Generates the sequence of numbers in the given interval, in parallel.  
+### Generic  
+####readFile(inputFormat, path) / FileInputFormat - Accepts a file input format.  
+####createInput  
+##### read from JDBC  
+###### Batch By JDBCInputFormat  
 1. 需要maven依赖 flink-jdbc_2.11、mysql-connector-java  
 2. 编写代码时候需要 自己 指定 字段名称和类型  
 [查看示例](./src/main/scala/com/yyb/flink10/batch/JDBC/ReadFromJDBCInputFormat.scala)
