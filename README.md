@@ -69,12 +69,19 @@ StreamingFileSink 有2种 File Formats：
 #### Bulk-encoded sink 需要也指定 写目录和 BulkWriter.Factory.
 BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactory, SequenceFileWriterFactory
 对应 三个 数据格式 (注意需要添加 maven flink 依赖)：
-
-1. ParquetWriterFactory parquet格式 需要添加 flink-parquet 和 parquet-avro 依赖
-
-2. Hadoop SequenceFileWriterFactory 需要添加依赖 flink-sequence-file、hadoop-client、flink-hadoop-compatibility 
-
-3. SequenceFileWriterFactory supports additional constructor parameters to specify compression settings
+1. ParquetWriterFactory parquet格式 需要添加 flink-parquet 和 parquet-avro 依赖  
+##### ParquetWriterFactory 产生的三种方式：
+在生成 ParquetWriterFactory 的时候一种有3中方法
+    1. forSpecificRecord(Class<T> type) 这种方式传入一个 class ；  
+    2. forGenericRecord(Schema schema)  这种方式传入的是一个 avro 包里面的 schema。在生产 avro 的 schema 许哟啊注意  
+        需要用到 avro 的 抽象类 Schema 的 静态方法 createRecord 来产生 schema 对象。  
+        注意对应的在 table 转化为 dataStream 对象的时候 也需要用到 toAppendStream(Table table, TypeInformation<T> typeInfo)和  
+        GenericRecordAvroTypeInfo 这个类来完成转换，否则将会出现 类转化异常  
+        这个需要maven加入 flink-avro 依赖。
+    3. forReflectRecord(Class<T> type)  这种方式传入也一个 class ；
+    4. [例子可见](./src/main/scala/com/yyb/flink10/table/blink/stream/FileSystem/ReadFromKafkaConnectorWriteToLocalParquetFileJava.java)   
+2. Hadoop SequenceFileWriterFactory 需要添加依赖 flink-sequence-file、hadoop-client、flink-hadoop-compatibility  
+3. SequenceFileWriterFactory supports additional constructor parameters to specify compression settings  
 
 ### StreamingFileSink RollingPolicy(滚动策略，文件轮替)
 1. DefaultRollingPolicy

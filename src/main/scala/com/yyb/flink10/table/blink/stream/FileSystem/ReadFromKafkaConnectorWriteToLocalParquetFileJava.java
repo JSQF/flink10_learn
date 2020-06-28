@@ -14,6 +14,7 @@ import org.apache.flink.api.java.typeutils.PojoTypeInfo;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.core.fs.Path;
+import org.apache.flink.formats.avro.typeutils.GenericRecordAvroTypeInfo;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -91,12 +92,18 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
         String fileSinkPath = "./xxx.text/rs6/";
 
 
+        GenericRecordAvroTypeInfo genericRecordAvroTypeInfo = new GenericRecordAvroTypeInfo(parquetSinkSchema);
+        DataStream testDataStream1 = flinkTableEnv.toAppendStream(test, genericRecordAvroTypeInfo);
+
+        testDataStream1.print().setParallelism(1);
+
+
         StreamingFileSink<GenericRecord> parquetSink = StreamingFileSink.
                 forBulkFormat(new Path(fileSinkPath),
                         ParquetAvroWriters.forGenericRecord(parquetSinkSchema))
                 .withRollingPolicy(OnCheckpointRollingPolicy.build())
                 .build();
-        testDataStream.addSink(parquetSink).setParallelism(1);
+        testDataStream1.addSink(parquetSink).setParallelism(1);
         flinkTableEnv.execute("ReadFromKafkaConnectorWriteToLocalFileJava");
 
 

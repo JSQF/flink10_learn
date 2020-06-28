@@ -5,8 +5,12 @@ import com.yyb.flink10.util1.GeneratorClassByASM;
 import net.sf.cglib.core.ReflectUtils;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+import org.apache.flink.core.fs.Path;
+import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
@@ -16,6 +20,7 @@ import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
+import org.apache.flink.types.Row;
 
 /**
   * 注意 这里 涉及到了 ASM 动态产生 class  并加载的 内容，可以参考 https://blog.csdn.net/u010374412/article/details/106714721 博文
@@ -79,6 +84,14 @@ public class ReadDataFromKafkaConnectorJava {
     DataStream testDataStream = flinkTableEnv.toAppendStream(test, tupleTypeInfo);  //使用 TypeInformation 的方式
     testDataStream.print().setParallelism(1);
 
+//    DataStream<Row> testDataStream1 = flinkTableEnv.toAppendStream(test, Row.class);
+//
+//    String fileSinkPath = "./xxx.text/rs7/";
+//    StreamingFileSink<Row> sink = StreamingFileSink.forBulkFormat(
+//            new Path(fileSinkPath),
+//            ParquetAvroWriters.forReflectRecord(Row.class))
+//            .withRollingPolicy(OnCheckpointRollingPolicy.build()).build();
+//    testDataStream1.addSink(sink);
     flinkTableEnv.execute("ReadDataFromKafkaConnector");
   }
 
