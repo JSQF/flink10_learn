@@ -88,18 +88,18 @@ BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactor
 对应 三个 数据格式 (注意需要添加 maven flink 依赖)：
 1. ParquetWriterFactory parquet格式 需要添加 flink-parquet 和 parquet-avro 依赖  
 ##### ParquetWriterFactory 产生的三种方式：
-在生成 ParquetWriterFactory 的时候一种有3中方法
+在生成 ParquetWriterFactory 的时候一种有3中方法  
     1. forSpecificRecord(Class<T> type) 这种方式传入一个 class ；  
     2. forGenericRecord(Schema schema)  这种方式传入的是一个 avro 包里面的 schema。在生产 avro 的 schema 许哟啊注意  
         需要用到 avro 的 抽象类 Schema 的 静态方法 createRecord 来产生 schema 对象。  
         注意对应的在 table 转化为 dataStream 对象的时候 也需要用到 toAppendStream(Table table, TypeInformation<T> typeInfo)和  
         GenericRecordAvroTypeInfo 这个类来完成转换，否则将会出现 类转化异常  
-        这个需要maven加入 flink-avro 依赖。
-    3. forReflectRecord(Class<T> type)  这种方式传入也一个 class ；
+        这个需要maven加入 flink-avro 依赖。  
+    3. forReflectRecord(Class<T> type)  这种方式传入也一个 class ；  
     4. [例子可见](./src/main/scala/com/yyb/flink10/table/blink/stream/FileSystem/ReadFromKafkaConnectorWriteToLocalParquetFileJava.java)  
     5. 为什么会对这个方法做这么多说明，因为如果我们想要做一些比较通过的程序，那么势必不应该处处使用到固定的 类， 
         所以动态根据 配置文件产生 shema的方式 就 显得非常重要了。当然你也可以在运行过程中，利用 ASM 等技术动态产生 class 类对象并加载；  
-        不过在 分布式运行环境下比较难在与master和worker之间的 动态类 共享使用问题。
+        不过在 分布式运行环境下比较难在与master和worker之间的 动态类 共享使用问题。  
 2. Hadoop SequenceFileWriterFactory 需要添加依赖 flink-sequence-file、hadoop-client、flink-hadoop-compatibility  
 3. SequenceFileWriterFactory supports additional constructor parameters to specify compression settings  
 
