@@ -95,7 +95,7 @@ BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactor
         注意对应的在 table 转化为 dataStream 对象的时候 也需要用到 toAppendStream(Table table, TypeInformation<T> typeInfo)和  
         GenericRecordAvroTypeInfo 这个类来完成转换，否则将会出现 类转化异常  
         这个需要maven加入 flink-avro 依赖。  
-        经过测试，这种方式也是不行的！！！  
+        经过测试，这种方式也是不行的！！！  最后通过 Apache Flink 中文用户邮件列表 提问才解决了。  
     3) forReflectRecord(Class<T> type)  这种方式传入也一个 class ；  
     4) [例子可见](./src/main/scala/com/yyb/flink10/table/blink/stream/FileSystem/ReadFromKafkaConnectorWriteToLocalParquetFileJava.java)  
     5) 为什么会对这个方法做这么多说明，因为如果我们想要做一些比较通过的程序，那么势必不应该处处使用到固定的 类， 

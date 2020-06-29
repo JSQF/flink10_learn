@@ -75,16 +75,6 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
         test.printSchema();
 
 
-
-        //transfor 2 dataStream
-//        TupleTypeInfo tupleTypeInfo = new TupleTypeInfo(GenericData.Record.class, BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO);
-        TupleTypeInfo tupleTypeInfo = new TupleTypeInfo(Tuple2.class, BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO);
-
-        DataStream testDataStream = flinkTableEnv.toAppendStream(test, tupleTypeInfo);
-
-        testDataStream.print().setParallelism(1);
-
-
         ArrayList<org.apache.avro.Schema.Field> fields = new ArrayList<org.apache.avro.Schema.Field>();
         fields.add(new org.apache.avro.Schema.Field("id", org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING), "id", JsonProperties.NULL_VALUE));
         fields.add(new org.apache.avro.Schema.Field("time", org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING), "time", JsonProperties.NULL_VALUE));
@@ -92,13 +82,27 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
         String fileSinkPath = "./xxx.text/rs6/";
 
 
-        GenericRecordAvroTypeInfo genericRecordAvroTypeInfo1 = new GenericRecordAvroTypeInfo(org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING));
-        GenericRecordAvroTypeInfo genericRecordAvroTypeInfo2 = new GenericRecordAvroTypeInfo(org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING));
-        TupleTypeInfo tupleTypeInfo1 = new TupleTypeInfo(genericRecordAvroTypeInfo1, genericRecordAvroTypeInfo2);
+        //transfor 2 dataStream
+        DataStream<Row> dataStream = flinkTableEnv.toAppendStream(test, Row.class);
+        SingleOutputStreamOperator<GenericRecord> dataStreamOfGenericDataRecord = dataStream.map(new MapFunction<Row, GenericRecord>() {
+            @Override
+            public GenericRecord map(Row value) throws Exception {
+                /**
+                 * 注意必须在这里 重新 写这个 schema，因为 Schema 里面的 Field 是不能序列化的，所以必须要在自己的节点上 再生成 自己的schema
+                 */
+                ArrayList<org.apache.avro.Schema.Field> fields = new ArrayList<org.apache.avro.Schema.Field>();
+                fields.add(new org.apache.avro.Schema.Field("id", org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING), "id", JsonProperties.NULL_VALUE));
+                fields.add(new org.apache.avro.Schema.Field("time", org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING), "time", JsonProperties.NULL_VALUE));
+                org.apache.avro.Schema parquetSinkSchema = org.apache.avro.Schema.createRecord("pi", "flinkParquetSink", "flink.parquet", true, fields);
+                GenericRecord record = new GenericData.Record(parquetSinkSchema);
+                for (int i = 0; i < value.getArity(); i++) {
+                    record.put(i, value.getField(i));
+                }
+                return record;
+            }
+        });
+        
 
-        DataStream testDataStream1 = flinkTableEnv.toAppendStream(test, tupleTypeInfo1);
-
-        testDataStream1.print().setParallelism(1);
 
 
         StreamingFileSink<GenericRecord> parquetSink = StreamingFileSink.
@@ -106,7 +110,7 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
                         ParquetAvroWriters.forGenericRecord(parquetSinkSchema))
                 .withRollingPolicy(OnCheckpointRollingPolicy.build())
                 .build();
-        testDataStream1.addSink(parquetSink).setParallelism(1);
+        dataStreamOfGenericDataRecord.addSink(parquetSink).setParallelism(1);
         flinkTableEnv.execute("ReadFromKafkaConnectorWriteToLocalFileJava");
 
 
