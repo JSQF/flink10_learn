@@ -92,8 +92,11 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
         String fileSinkPath = "./xxx.text/rs6/";
 
 
-        GenericRecordAvroTypeInfo genericRecordAvroTypeInfo = new GenericRecordAvroTypeInfo(parquetSinkSchema);
-        DataStream testDataStream1 = flinkTableEnv.toAppendStream(test, genericRecordAvroTypeInfo);
+        GenericRecordAvroTypeInfo genericRecordAvroTypeInfo1 = new GenericRecordAvroTypeInfo(org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING));
+        GenericRecordAvroTypeInfo genericRecordAvroTypeInfo2 = new GenericRecordAvroTypeInfo(org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING));
+        TupleTypeInfo tupleTypeInfo1 = new TupleTypeInfo(genericRecordAvroTypeInfo1, genericRecordAvroTypeInfo2);
+
+        DataStream testDataStream1 = flinkTableEnv.toAppendStream(test, tupleTypeInfo1);
 
         testDataStream1.print().setParallelism(1);
 
