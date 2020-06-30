@@ -90,7 +90,7 @@ BulkWriter.Factory 有 3 个实现类 CompressWriterFactory, ParquetWriterFactor
 ##### ParquetWriterFactory 产生的三种方式：
 在生成 ParquetWriterFactory 的时候一种有3中方法  
     1) forSpecificRecord(Class<T> type) 这种方式传入一个 class ；  
-    2) forGenericRecord(Schema schema)  这种方式传入的是一个 avro 包里面的 schema。在生产 avro 的 schema 许哟啊注意  
+    2) forGenericRecord(Schema schema)  这种方式传入的是一个 avro 包里面的 schema。在生产 avro 的 schema 的时候注意  
         需要用到 avro 的 抽象类 Schema 的 静态方法 createRecord 来产生 schema 对象。  
         注意对应的在 table 转化为 dataStream 对象的时候 也需要用到 toAppendStream(Table table, TypeInformation<T> typeInfo)和  
         GenericRecordAvroTypeInfo 这个类来完成转换，否则将会出现 类转化异常  

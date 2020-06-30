@@ -31,6 +31,7 @@ import org.apache.flink.table.descriptors.*;
 import org.apache.flink.types.Row;
 import org.codehaus.jackson.JsonNode;
 
+import java.io.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,25 +85,39 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
 
         //transfor 2 dataStream
         DataStream<Row> dataStream = flinkTableEnv.toAppendStream(test, Row.class);
-        SingleOutputStreamOperator<GenericRecord> dataStreamOfGenericDataRecord = dataStream.map(new MapFunction<Row, GenericRecord>() {
-            @Override
-            public GenericRecord map(Row value) throws Exception {
-                /**
-                 * 注意必须在这里 重新 写这个 schema，因为 Schema 里面的 Field 是不能序列化的，所以必须要在自己的节点上 再生成 自己的schema
-                 */
+
+
+         class TransforMapFunc implements MapFunction<Row, GenericRecord>, Serializable {
+            /**
+             * 注意必须在这里 重新 写这个 schema，因为 Schema 里面的 Field 是不能序列化的，所以必须要在自己的节点上 再生成 自己的schema
+             */
+            private transient org.apache.avro.Schema parquetSinkSchema;
+
+            public TransforMapFunc(){
+                schemaInit();
+            }
+            public void schemaInit(){
                 ArrayList<org.apache.avro.Schema.Field> fields = new ArrayList<org.apache.avro.Schema.Field>();
                 fields.add(new org.apache.avro.Schema.Field("id", org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING), "id", JsonProperties.NULL_VALUE));
                 fields.add(new org.apache.avro.Schema.Field("time", org.apache.avro.Schema.create(org.apache.avro.Schema.Type.STRING), "time", JsonProperties.NULL_VALUE));
-                org.apache.avro.Schema parquetSinkSchema = org.apache.avro.Schema.createRecord("pi", "flinkParquetSink", "flink.parquet", true, fields);
+                parquetSinkSchema = org.apache.avro.Schema.createRecord("pi", "flinkParquetSink", "flink.parquet", true, fields);
+            }
+
+            @Override
+            public GenericRecord map(Row value) throws Exception {
+                if(parquetSinkSchema == null){
+                    schemaInit();
+                }
                 GenericRecord record = new GenericData.Record(parquetSinkSchema);
                 for (int i = 0; i < value.getArity(); i++) {
                     record.put(i, value.getField(i));
                 }
                 return record;
             }
-        });
-        
 
+        }
+        TransforMapFunc transforMapFunc = new TransforMapFunc();
+        SingleOutputStreamOperator<GenericRecord> dataStreamOfGenericDataRecord = dataStream.map(transforMapFunc);
 
 
         StreamingFileSink<GenericRecord> parquetSink = StreamingFileSink.
