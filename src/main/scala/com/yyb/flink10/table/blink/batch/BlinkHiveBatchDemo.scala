@@ -21,7 +21,7 @@ object BlinkHiveBatchDemo {
     val hiveConfDir = this.getClass.getResource("/").getFile  //可以通过这一种方式设置 hiveConfDir，这样的话，开发与测试和生产环境可以保持一致
 
     val version = "2.3.6"
-    val hive = new  HiveCatalog(name, defaultDatabase, hiveConfDir, version)
+    val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir, version)
 
     bbTableEnv.registerCatalog("myhive", hive)
     bbTableEnv.useCatalog("myhive")
