@@ -55,5 +55,6 @@ object BlinkBatchReadFromJDBCTableSource {
     blinkBatchTableEnv.sqlQuery("select * from t_order").printSchema()
 
 
+
   }
 }
