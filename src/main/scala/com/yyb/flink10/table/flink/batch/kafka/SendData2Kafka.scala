@@ -1,5 +1,8 @@
 package com.yyb.flink10.table.flink.batch.kafka
 
+import java.io.InputStream
+import java.util.Properties
+
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
@@ -20,11 +23,16 @@ object SendData2Kafka {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     val blinkTableEnv = StreamTableEnvironment.create(env, settings)
 
+    val in_env: InputStream = ClassLoader.getSystemResourceAsStream("env.properties")
+    val prop: Properties = new Properties()
+    prop.load(in_env)
+    println(prop.getProperty("zookeeper.connect"))
+
     val kafka = new Kafka
     kafka.version("0.11")
       .topic("eventsource_yhj")
-      .property("zookeeper.connect", "172.16.10.16:2181,172.16.10.17:2181,172.16.10.18:2181")
-      .property("bootstrap.servers", "172.16.10.19:9092,172.16.10.26:9092,172.16.10.27:9092").
+      .property("zookeeper.connect", prop.getProperty("zookeeper.connect"))
+      .property("bootstrap.servers", prop.getProperty("bootstrap.servers")).
       property("group.id", "yyb_dev")
       .startFromLatest
 
