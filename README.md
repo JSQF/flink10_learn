@@ -3,9 +3,9 @@
 [github 地址](https://github.com/JSQF/flink10_learn)  
 [码云 地址](https://gitee.com/jsqf/flink10_learn)  
 ## 包目录介绍
-batch存放 批代码的包
+DataSet存放 批代码的包
 
-stream存放 流代码的包
+DataStream存放 流代码的包
 
 
 ## flink parquet

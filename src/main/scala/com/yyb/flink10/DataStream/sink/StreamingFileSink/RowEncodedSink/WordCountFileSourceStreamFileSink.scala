@@ -1,4 +1,4 @@
-package com.yyb.flink10.stream.sink.StreamingFileSink.RowEncodedSink
+package com.yyb.flink10.DataStream.sink.StreamingFileSink.RowEncodedSink
 
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.api.java.utils.ParameterTool

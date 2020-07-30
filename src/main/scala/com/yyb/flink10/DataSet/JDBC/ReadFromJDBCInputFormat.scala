@@ -1,4 +1,4 @@
-package com.yyb.flink10.batch.JDBC
+package com.yyb.flink10.DataSet.JDBC
 
 import java.sql.Date
 

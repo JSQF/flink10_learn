@@ -1,6 +1,6 @@
-package com.yyb.flink10.stream.sink.StreamingFileSink.RowEncodedSink;
+package com.yyb.flink10.DataStream.sink.StreamingFileSink.RowEncodedSink;
 
-import com.yyb.flink10.stream.data.WordCountData;
+import com.yyb.flink10.DataStream.data.WordCountData;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringEncoder;
 import org.apache.flink.api.java.tuple.Tuple2;

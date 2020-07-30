@@ -241,11 +241,13 @@ WHERE o.id = s.orderId AND
       o.ordertime BETWEEN s.shiptime - INTERVAL '4' HOUR AND s.shiptime
 ~~~  
 只支持有时间属性的表 join  
-## Join with a Temporal Table Function 
-即 你可以使用 Temporal Table 或者 使用 Temporal Table Function  
+## Join with a Temporal Table Function  
+即 你可以使用 Temporal Table 或者 使用 Temporal Table Function,但是需要注意维表的信息更新的话，Temporal Table 不会及时更新的    
 ### temporal tables 时态表  
 时态表函数，不能可以通过sql直接查询某个时间点下的 时态表的数据,只能在join过程中使用这个时态表函数的数据    
 [参考](https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/streaming/temporal_tables.html#temporal-table)  
 ### Temporal Table Function 时态表函数  
 时态表函数，不能直接查询某个时间点下的 时态表函数的数据，只能在join过程中使用这个时态表函数的数据  
 [参考](https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/streaming/temporal_tables.html#temporal-table-function)  
+## Join with a Lookup Function   
+这个 Lookup Function 的作用就是 去查 数据源的数据，如果没有配置 缓存的话，就是 实时查询 数据源的  

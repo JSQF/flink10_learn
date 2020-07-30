@@ -50,7 +50,7 @@ public class JoinWithTeporalTableFunction {
                 .build();
 
         JDBCReadOptions jdbcReadOption = JDBCReadOptions.builder()
-                .setFetchSize(0)
+//                .setFetchSize(0)
                 .build();
 
         TableSchema tableSchema = TableSchema.builder()
@@ -110,11 +110,16 @@ public class JoinWithTeporalTableFunction {
 //        oederDS.print().setParallelism(1);
         Table orders = blinkTableEnv.fromDataStream(oederDS, "amount,currency,proctime.proctime");
         blinkTableEnv.registerTable("Orders", orders);
-        DataStream<Row> orderPC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select * from Orders"), Row.class);
+        DataStream<Row> orderPC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select *, '---' from Orders"), Row.class);
         orderPC.print().setParallelism(1);
 
+        /**
+         * 注意 使用 temporal table 作为 维表的时候，当维表 有更新的时候，temporal table 不会更新的
+         *
+         * 但是 使用 lookup function 的时候 是可以更新的 (不能配置 缓存时间 和 条数)， 但是就不是 temporal table 了
+         */
         String sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount from Orders as o , LATERAL TABLE (Rates(o.proctime)) as r WHERE o.currency = r.currency";
-        sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount from  Orders as o , LATERAL TABLE (jdbcLookup(o.currency)) as r";
+        sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate , 'hahaha' AS amount from  Orders as o , LATERAL TABLE (jdbcLookup(o.currency)) as r"; //lookup function
         Table rs1 = blinkTableEnv.sqlQuery(sql1);
         DataStream<Row> rs1DS = blinkTableEnv.toAppendStream(rs1, Row.class);
         rs1DS.print().setParallelism(1);

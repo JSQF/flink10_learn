@@ -1,4 +1,4 @@
-package com.yyb.flink10.batch
+package com.yyb.flink10.DataSet
 
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.api.scala._

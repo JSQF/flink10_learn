@@ -1,7 +1,7 @@
-package com.yyb.flink10.batch.JDBC
+package com.yyb.flink10.DataSet.JDBC
 
-import com.yyb.flink10.stream.data.WordCountData
-import com.yyb.flink10.stream.parquet.WriteParquetWordCount.WORDCOUNT
+import com.yyb.flink10.DataStream.data.WordCountData
+import com.yyb.flink10.DataStream.parquet.WriteParquetWordCount.WORDCOUNT
 import org.apache.flink.api.java.io.jdbc.JDBCOutputFormat
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.api.scala._

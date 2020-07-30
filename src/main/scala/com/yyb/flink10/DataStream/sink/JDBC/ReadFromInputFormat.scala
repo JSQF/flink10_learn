@@ -1,4 +1,4 @@
-package com.yyb.flink10.stream.sink.JDBC
+package com.yyb.flink10.DataStream.sink.JDBC
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.io.jdbc.JDBCInputFormat
