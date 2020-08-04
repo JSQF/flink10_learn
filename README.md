@@ -218,6 +218,15 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 [代码可见](./src/main/scala/com/yyb/flink10/table/blink/DataStream/kafka/ReadDataFromKafkaConnectorJava.java)  
 #### HBase
 #### JDBC
+##### Append Only like insert
+[可以参考这个博文](https://www.jianshu.com/p/c352d0c4a458)  
+[代码可见](./src/main/scala/com/yyb/flink10/table/flink/stream/JDBC/InsetMode/AppendOnly.java)  
+##### Retract Stream  like delete + insert
+[代码可见](./src/main/scala/com/yyb/flink10/table/flink/stream/JDBC/InsetMode/RetractStream.java)  
+##### Upsert Stream  like 一般是 upadte  
+The main difference to a retract stream is that UPDATE changes are  
+encoded with a single message and are therefore more efficient.   
+[代码可见](./src/main/scala/com/yyb/flink10/table/flink/stream/JDBC/InsetMode/UpsertStream.java)  
 
 ## State
 ### Using Managed Keyed State  
