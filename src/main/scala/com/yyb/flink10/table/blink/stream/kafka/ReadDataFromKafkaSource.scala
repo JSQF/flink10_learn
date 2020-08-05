@@ -24,5 +24,7 @@ object ReadDataFromKafkaSource {
     val kafkaSource = kafkaSourceFactory.createStreamTableSource(proper)
 
     flinkTableEnv.registerTableSource( "kafka", kafkaSource)
+
+    env.execute("")
   }
 }

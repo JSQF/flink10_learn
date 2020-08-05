@@ -52,6 +52,8 @@ object StreamJobReadFromJDBCTableSource {
 
     val t_order: Table =  streamTableEnv.fromTableSource(jdbcTableSource)
 
+    streamTableEnv.registerTableSource("t_order1", jdbcTableSource)
+
     streamTableEnv.createTemporaryView("t_order", t_order)
 
     val sql =
