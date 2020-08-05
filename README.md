@@ -231,6 +231,12 @@ encoded with a single message and are therefore more efficient.
 ## State
 ### Using Managed Keyed State  
 [代码可见](./src/main/scala/com/yyb/flink10/DataStream/State/StateOfCountWindowAverage.java)  
+#### KeyedProcessFunction + 延迟触发  
+KeyedProcessFunction 在内部使用了 Keyed State。  
+[代码可见](./src/main/scala/com/yyb/flink10/DataStream/ProcessFunction/KeyedProcessFunctionDemo.java)   
+#### ProcessFunction + 延迟触发  
+[代码可见](./src/main/scala/com/yyb/flink10/DataStream/ProcessFunction/OperatorProcessFunctionDemo.java)  
+
 ### Using Managed Operator State(no-key 算子状态)  
 #### CheckpointedFunction  
 #### ListCheckpointed  
@@ -240,10 +246,12 @@ encoded with a single message and are therefore more efficient.
 ### 从 flink 官网使用 maven 初始化的项目 问题
 1. idea 本地运行 提示 缺包问题。修改 pom文件 dependency 的 scope 范围，可以直接注释掉这个 选项
 ### DataSet 程序 有的 地方不执行的问题
-1. DataSet 程序 有的地方没有执行，可能你的程序 最后没有调用 env.execution() 方法
-2. 目前来看，只有在 有 sink的情况下，需要 加 env.execution() 方法
+1. DataSet 程序 有的地方没有执行，可能你的程序 最后没有调用 env.execution() 方法  
+2. 目前来看，只有在 有 sink的情况下，需要 加 env.execution() 方法  
 ### 在自己的 JOb 后面有 env.execution() 的时候，有时候运行JOb会保存  
-这个原因是，只有在有 Sink 的时候，才需要调用 env.execution() 这个方法。
+这个原因是，只有在有 Sink 的时候，才需要调用 env.execution() 这个方法。  
+### 当 JDBC 这些 有界表 作为 维度表 使用 tableSource 使用的时候， 可能会发生 checkPoint 失败的，  
+所以 需要注意；  
 
 
 ## Flink10 BUG
