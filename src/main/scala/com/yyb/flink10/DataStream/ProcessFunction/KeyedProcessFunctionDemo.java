@@ -60,8 +60,8 @@ public class KeyedProcessFunctionDemo {
 
 
         dataSource.keyBy(1).process(new org.apache.flink.streaming.api.functions.KeyedProcessFunction<Tuple, Tuple2<Long, Long>, Tuple2<Long, Long>>() {
-            private ValueState<Long> timeState;
-            private ValueState<Tuple2<Long, Long>> msgState;
+            private transient ValueState<Long> timeState;
+            private transient ValueState<Tuple2<Long, Long>> msgState;
                 @Override
                 public void open(Configuration parameters) throws Exception {
                     timeState = getRuntimeContext().getState(new ValueStateDescriptor<Long>("timeState", TypeInformation.of(Long.TYPE)));

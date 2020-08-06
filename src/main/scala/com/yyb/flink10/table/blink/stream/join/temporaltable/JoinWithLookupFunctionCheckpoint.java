@@ -24,11 +24,11 @@ import org.apache.flink.types.Row;
 
 /**
  * @Author yyb
- * @Description
+ * @Description lookupFunction 作为 维度表 和 checkpoint 结合 是没有问题的
  * @Date Create in 2020-07-27
  * @Time 16:59
  */
-public class JoinWithTeporalTableFunction {
+public class JoinWithLookupFunctionCheckpoint {
     public static void main(String[] args) throws Exception {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -39,12 +39,11 @@ public class JoinWithTeporalTableFunction {
                 .setMaxRetryTimes(3)
                 .build();
 
-        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         env.enableCheckpointing(3000);
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(3);
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-
+        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
         // jdbc temportal table start
         JDBCOptions jdbcOpition = JDBCOptions.builder()
@@ -72,23 +71,10 @@ public class JoinWithTeporalTableFunction {
                 .setSchema(tableSchema)
                 .build();
 
-        blinkTableEnv.registerTableSource("LatestRates", jdbcTableSource);
 
         blinkTableEnv.registerFunction("jdbcLookup", jdbcTableSource.getLookupFunction(new String[]{"currency"}));
         // jdbc temportal table end
 
-        String sql = "select * from LatestRates";
-        Table a = blinkTableEnv.sqlQuery(sql);
-        DataStream<Row> jdbcSourceDataStream = blinkTableEnv.toAppendStream(a, Row.class);
-//        jdbcSourceDataStream.print().setParallelism(1);
-
-        Table ratesHistory = blinkTableEnv.fromDataStream(jdbcSourceDataStream, "currency, rate, proctime.proctime");
-        blinkTableEnv.createTemporaryView("RatesHistory", ratesHistory);
-        DataStream<Row> ratePC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select * from RatesHistory"), Row.class);
-        ratePC.print().setParallelism(1);
-
-        org.apache.flink.table.functions.TemporalTableFunction rates = ratesHistory.createTemporalTableFunction("proctime", "currency");
-        blinkTableEnv.registerFunction("Rates", rates);
 
 
         Kafka kafka = new Kafka();

@@ -27,7 +27,7 @@ import java.util.Properties;
 
 /**
  * @Author yyb
- * @Description
+ * @Description lookupFunction 作为 维度表 和 checkpoint 结合 是没有问题的
  * @Date Create in 2020-08-05
  * @Time 09:23
  */
@@ -43,7 +43,9 @@ public class OperatorProcessFunctionDemo {
 
         String checkPointPath = "./checkPointPath/";
 //        env.setStateBackend(new FsStateBackend(checkPointPath));
-//        env.setStateBackend(new RocksDBStateBackend(checkPointPath));
+        RocksDBStateBackend stateBackend = new RocksDBStateBackend(checkPointPath, true);
+        stateBackend.isIncrementalCheckpointsEnabled(); //增量 checkPonit 增量 state
+        env.setStateBackend(stateBackend);
 
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "172.16.10.19:9092,172.16.10.26:9092,172.16.10.27:9092");
@@ -71,8 +73,8 @@ public class OperatorProcessFunctionDemo {
 
 
         dataSource.process(new ProcessFunction<Tuple2<Long, Long>, Tuple2<Long, Long>>() {
-            private ValueState<Long> timeState;
-            private ValueState<Tuple2<Long, Long>> msgState;
+            private transient ValueState<Long> timeState;
+            private transient ValueState<Tuple2<Long, Long>> msgState;
                 @Override
                 public void open(Configuration parameters) throws Exception {
                     // 过期清理元素 设置

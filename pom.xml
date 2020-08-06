@@ -211,6 +211,13 @@ under the License.
 			<scope>${slef.scope}</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-runtime-web_2.11</artifactId>
+			<version>${flink.version}</version>
+			<scope>${slef.scope}</scope>
+		</dependency>
+
         <!-- https://mvnrepository.com/artifact/org.datanucleus/datanucleus-api-jdo -->
         <dependency>
             <groupId>org.datanucleus</groupId>

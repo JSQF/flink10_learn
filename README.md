@@ -251,7 +251,8 @@ KeyedProcessFunction 在内部使用了 Keyed State。
 ### 在自己的 JOb 后面有 env.execution() 的时候，有时候运行JOb会保存  
 这个原因是，只有在有 Sink 的时候，才需要调用 env.execution() 这个方法。  
 ### 当 JDBC 这些 有界表 作为 维度表 使用 tableSource 使用的时候， 可能会发生 checkPoint 失败的，  
-所以 需要注意；  
+所以 需要注意，在 flink 的 流处理中  维度表 不要使用 有界数据源；  
+无界数据源 做 维度表 是 完全符合 要求的！！！  
 
 
 ## Flink10 BUG

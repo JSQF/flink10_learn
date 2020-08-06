@@ -1,6 +1,7 @@
 package com.yyb.flink10.table.blink.stream.kafka;
 
 import com.yyb.flink10.commonEntity.Current1;
+import com.yyb.flink10.commonEntity.Rate;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
@@ -13,7 +14,6 @@ import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -24,7 +24,7 @@ import java.util.Properties;
  * @Date Create in 2020-08-03
  * @Time 08:53
  */
-public class WriteToKafkaByKafkaConnector {
+public class WriteToKafkaByKafkaConnectorOfRates {
     public static void main(String [] args) throws Exception {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -36,30 +36,32 @@ public class WriteToKafkaByKafkaConnector {
 
         Kafka kafka = new Kafka();
         kafka.version("0.11")
-                .topic("eventsource_yhj")
+                .topic("eventsource_rate")
                 .property("zookeeper.connect", prop.getProperty("zookeeper.connect"))
                 .property("bootstrap.servers", prop.getProperty("bootstrap.servers")).
                 property("group.id", "yyb_dev")
                 .startFromLatest();
+
         Schema schema = new Schema();
         TableSchema tableSchema1 = TableSchema.builder()
-                .field("amount", DataTypes.INT())
+                .field("rowtime", DataTypes.STRING())
                 .field("currency", DataTypes.STRING())
+                .field("rate", DataTypes.INT())
                 .build();
         schema.schema(tableSchema1);
         ConnectTableDescriptor tableSource = blinkTableEnv.connect(kafka)
                 .withFormat(new Json().failOnMissingField(true))
                 .withSchema(schema);
-        tableSource.createTemporaryTable("Orders");
+        tableSource.createTemporaryTable("Rates");
 
         ArrayList data = new ArrayList();
-        data.add(new Current1(1, "Euro"));
+        data.add(new Rate("10:00", "Euro", 120));
 
         DataStreamSource dataDS = env.fromCollection(data);
         Table dataTable = blinkTableEnv.fromDataStream(dataDS);
         blinkTableEnv.registerTable("source", dataTable);
 
-        String sql = "insert into Orders select * from source";
+        String sql = "insert into Rates select rowtime,currency,rate from source";
 
         blinkTableEnv.sqlUpdate(sql);
 
