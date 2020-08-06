@@ -197,6 +197,20 @@ under the License.
             </exclusions>
             <!--<scope>provided</scope>-->
         </dependency>
+
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-state-backends</artifactId>
+			<version>${flink.version}</version>
+			<scope>${slef.scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
+			<version>${flink.version}</version>
+			<scope>${slef.scope}</scope>
+		</dependency>
+
         <!-- https://mvnrepository.com/artifact/org.datanucleus/datanucleus-api-jdo -->
         <dependency>
             <groupId>org.datanucleus</groupId>
