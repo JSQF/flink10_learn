@@ -15,7 +15,9 @@ import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -34,9 +36,11 @@ public class WriteToKafkaByKafkaConnectorOfRates {
         prop.load(in_env);
         System.out.println(prop.getProperty("zookeeper.connect"));
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         Kafka kafka = new Kafka();
         kafka.version("0.11")
-                .topic("eventsource_rate")
+                .topic("eventsource_yyb_rate")
                 .property("zookeeper.connect", prop.getProperty("zookeeper.connect"))
                 .property("bootstrap.servers", prop.getProperty("bootstrap.servers")).
                 property("group.id", "yyb_dev")
@@ -55,7 +59,7 @@ public class WriteToKafkaByKafkaConnectorOfRates {
         tableSource.createTemporaryTable("Rates");
 
         ArrayList data = new ArrayList();
-        data.add(new Rate("10:00", "Euro", 120));
+        data.add(new Rate(new Date().getTime() + "", "Euro", 120));
 
         DataStreamSource dataDS = env.fromCollection(data);
         Table dataTable = blinkTableEnv.fromDataStream(dataDS);

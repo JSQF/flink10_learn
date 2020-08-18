@@ -1,19 +1,17 @@
 package com.yyb.flink10.table.blink.stream.join.temporaltable;
 
+import com.alibaba.fastjson.JSON;
 import com.yyb.flink10.commonEntity.Current1;
 import com.yyb.flink10.commonEntity.Rate;
-import org.apache.flink.api.java.io.jdbc.JDBCLookupOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCReadOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCTableSource;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
@@ -23,24 +21,18 @@ import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
-import org.apache.flink.table.functions.TemporalTableFunction;
-import org.apache.flink.table.types.AtomicDataType;
-import org.apache.flink.table.types.logical.IntType;
-import org.apache.flink.table.types.logical.VarCharType;
 import org.apache.flink.types.Row;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.Properties;
 
 /**
  * @Author yyb
- * @Description kafka 作为 流式维度表 注意这里不能 通过 kafkaTableSource 转 dataStream ，加 waterMark ，再加 rowtime，flink 会报 空指针 错误
- * 请使用 kafkaConsumer
+ * @Description kafka 作为 流式维度表
  * @Date Create in 2020-07-27
  * @Time 16:59
  */
-public class JoinWithKafkaTeporalTableFunction {
+public class JoinWithKafkaConsumerTeporalTableFunction {
     public static void main(String[] args) throws Exception {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -59,75 +51,45 @@ public class JoinWithKafkaTeporalTableFunction {
         prop.load(in_env);
 
 
+        Properties properties = new Properties();
+        properties.setProperty("bootstrap.servers", prop.getProperty("bootstrap.servers"));
+        properties.setProperty("zookeeper.connect", prop.getProperty("zookeeper.connect"));
+        properties.setProperty("group.id", "test");
+
         /**
          *  Orders kafka
          */
-//        Kafka kafka = new Kafka();
-//        kafka.version("0.11")
-//                .topic("eventsource_yyb_order")
-//                .property("zookeeper.connect", prop.getProperty("zookeeper.connect"))
-//                .property("bootstrap.servers", prop.getProperty("bootstrap.servers"))
-//                .property("group.id", "yyb_dev")
-//                .startFromLatest();
-//
-//        Schema schema = new Schema();
-//        TableSchema tableSchema1 = TableSchema.builder()
-//                .field("rowtime", DataTypes.STRING())
-//                .field("amount", DataTypes.INT())
-//                .field("currency", DataTypes.STRING())
-//                .build();
-//        schema.schema(tableSchema1);
-//
-//
-//        ConnectTableDescriptor tableSource  =  blinkTableEnv.connect(kafka)
-//                .withFormat( new Json().failOnMissingField(true) )
-//                .withSchema(schema);
-//
-//        tableSource.createTemporaryTable("Orders_tmp");
-//
-//        String sql_order = "select  amount, currency, rowtime from Orders_tmp";
-//        Table order = blinkTableEnv.sqlQuery(sql_order);
-//        DataStream<Current1> oederDS = blinkTableEnv.toAppendStream(order, Current1.class);
-//        oederDS.assignTimestampsAndWatermarks((AssignerWithPeriodicWatermarks)new TimestampExtractorOrder(Time.seconds(0)));
-////        oederDS.print().setParallelism(1);
-//        Table orders = blinkTableEnv.fromDataStream(oederDS, "amount,currency,user_action_time.rowtime");
-//        blinkTableEnv.registerTable("Orders", orders);
-//        DataStream<Row> orderPC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select *, '---' from Orders"), Row.class);
-//        orderPC.print().setParallelism(1);
-
+        FlinkKafkaConsumer011<String> kafkaSourceOrder = new FlinkKafkaConsumer011<String>("eventsource_yyb_order", new SimpleStringSchema(), properties);
+        DataStream<String> streamOrderStr = env.addSource(kafkaSourceOrder);
+        DataStream<Current1> streamOrder = streamOrderStr.map(new MapFunction<String, Current1>() {
+            @Override
+            public Current1 map(String value) throws Exception {
+                Current1 current1 = JSON.parseObject(value, Current1.class);
+                return current1;
+            }
+        });
+        streamOrder.assignTimestampsAndWatermarks(new TimestampExtractorOrder(Time.seconds(0)));
+//        oederDS.print().setParallelism(1);
+        Table orders = blinkTableEnv.fromDataStream(streamOrder, "amount,currency,user_action_time.rowtime");
+        blinkTableEnv.registerTable("Orders", orders);
+        DataStream<Row> orderPC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select *, '---' from Orders"), Row.class);
+        orderPC.print().setParallelism(1);
 
         /**
          * Rates kafka
          */
-        Kafka kafka_rate = new Kafka();
-        kafka_rate.version("0.11")
-                .topic("eventsource_yyb_rate")
-                .property("zookeeper.connect", prop.getProperty("zookeeper.connect"))
-                .property("bootstrap.servers", prop.getProperty("bootstrap.servers"))
-                .property("group.id", "yyb_dev")
-                .startFromLatest();
 
-        Schema schema_rate = new Schema();
-        TableSchema tableSchema_rate = TableSchema.builder()
-                .field("rowtime", DataTypes.STRING())
-                .field("currency", DataTypes.STRING())
-                .field("rate", DataTypes.INT())
-                .build();
-        schema_rate.schema(tableSchema_rate);
-        ConnectTableDescriptor tableSource_rate  =  blinkTableEnv.connect(kafka_rate)
-                .withFormat( new Json().failOnMissingField(true) )
-                .withSchema(schema_rate);
-        tableSource_rate.createTemporaryTable("rate_tmp");
-
-        String sql_rate = "select currency, rate, rowtime from rate_tmp";
-        Table rate = blinkTableEnv.sqlQuery(sql_rate);
-        DataStream<Rate> rateDS = blinkTableEnv.toAppendStream(rate, Rate.class);
-        rateDS.print().setParallelism(1);
-        rateDS.assignTimestampsAndWatermarks(new TimestampExtractorRate(Time.seconds(0)));
-        /**
-         * 注意这里不能 通过 kafkaTableSource 转 dataStream ，加 waterMark ，再加 rowtime，flink 会报 空指针 错误
-         */
-        Table rates = blinkTableEnv.fromDataStream(rateDS, "currency,rate,user_action_time.rowtime");
+        FlinkKafkaConsumer011<String> kafkaSource = new FlinkKafkaConsumer011<String>("eventsource_yyb_rate", new SimpleStringSchema(), properties);
+        DataStream<String> stream = env.addSource(kafkaSource);
+        DataStream<Rate> rate = stream.map(new MapFunction<String, Rate>() {
+            @Override
+            public Rate map(String value) throws Exception {
+                Rate rate = JSON.parseObject(value, Rate.class);
+                return rate;
+            }
+        });
+        rate.assignTimestampsAndWatermarks(new TimestampExtractorRate(Time.seconds(0)));
+        Table rates = blinkTableEnv.fromDataStream(rate, "currency,rate,user_action_time.rowtime");
         DataStream<Row> xx = blinkTableEnv.toAppendStream(rates, Row.class);
         xx.print().setParallelism(1);
 //        blinkTableEnv.registerTable("Rates", rates);

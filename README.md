@@ -74,6 +74,35 @@ DataStream存放 流代码的包
 [查看示例](./src/main/scala/com/yyb/flink10/table/blink/DataStream/JDBC/ReadDataFromJDBCTableSource.scala)
 
 ## Sink
+
+### 时间戳 指定 和 水印产生  
+#### 时间戳 指定  
+##### 直接在数据源中指定  
+###### kafka  
+#### 通过 TimestampAssigner 接口指定  
+#### 水印产生  
+##### 周期性水印  
+周期型水印需要配合 ExecutionConfig.setAutoWatermarkInterval(...) 设置 时间 使用；  
+需要实现 AssignerWithPeriodicWatermarks 接口
+###### 内置的周期性水印内部实现 
+####### AscendingTimestampExtractor  
+AscendingTimestampExtractor产生的时间戳和水印必须是单调非递减的，用户通过覆写extractAscendingTimestamp()方法抽取时间戳。  
+如果产生了递减的时间戳，就要使用名为MonotonyViolationHandler的组件处理异常，  
+有两种方式：打印警告日志（默认）和抛出RuntimeException。  
+单调递增的事件时间并不太符合实际情况，所以AscendingTimestampExtractor用得不多。  
+####### BoundedOutOfOrdernessTimestampExtractor  
+BoundedOutOfOrdernessTimestampExtractor产生的时间戳和水印是允许“有界乱序”的，  
+构造它时传入的参数maxOutOfOrderness就是乱序区间的长度，而实际发射的水印为通过覆写extractTimestamp()方法提取出来的时间戳减去乱序区间，  
+相当于让水印把步调“放慢一点”。这是Flink为迟到数据提供的第一重保障。  
+当然，乱序区间的长度要根据实际环境谨慎设定，设定得太短会丢较多的数据，设定得太长会导致窗口触发延迟，实时性减弱。  
+####### IngestionTimeExtractor  
+IngestionTimeExtractor基于当前系统时钟生成时间戳和水印，其实就是Flink三大时间特征里的摄入时间了。  
+##### 带标点水印，就是只提取有 event 时间的数据作为水印,没有 event 时间的数据，返回null水印     
+需要实现 AssignerWithPunctuatedWatermarks 接口  
+打点水印比周期性水印用的要少不少，并且Flink没有内置的实现。  
+AssignerWithPunctuatedWatermarks适用于需要依赖于事件本身的某些属性决定是否发射水印的情况。  
+我们实现checkAndGetNextWatermark()方法来产生水印，产生的时机完全由用户控制。上面例子中是收取到用户ID末位为0的数据时才发射。  
+
 ### StreamingFileSink format
 StreamingFileSink 有2种 File Formats：
 1. Row-encoded sink
@@ -235,9 +264,10 @@ encoded with a single message and are therefore more efficient.
 KeyedProcessFunction 在内部使用了 Keyed State。  
 [代码可见](./src/main/scala/com/yyb/flink10/DataStream/ProcessFunction/KeyedProcessFunctionDemo.java)   
 #### ProcessFunction + 延迟触发  
-[代码可见](./src/main/scala/com/yyb/flink10/DataStream/ProcessFunction/OperatorProcessFunctionDemo.java)  
+[代码可见](./src/main/scala/com/yyb/flink10/DataStream/ProcessFunction/KeyedProcessFunctionDemo.java)  
 
-### Using Managed Operator State(no-key 算子状态)  
+### Using Managed Operator State(no-key 算子状态)   
+注意 processFucntion 只能适用于 Keyed State    
 #### CheckpointedFunction  
 #### ListCheckpointed  
 #### Stateful Source Functions 保证 source 的  exactly-once  

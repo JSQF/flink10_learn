@@ -16,6 +16,7 @@ import org.apache.flink.table.descriptors.Schema;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -36,13 +37,14 @@ public class WriteToKafkaByKafkaConnectorOfOrder {
 
         Kafka kafka = new Kafka();
         kafka.version("0.11")
-                .topic("eventsource_yhj")
+                .topic("eventsource_yyb_order")
                 .property("zookeeper.connect", prop.getProperty("zookeeper.connect"))
                 .property("bootstrap.servers", prop.getProperty("bootstrap.servers")).
                 property("group.id", "yyb_dev")
                 .startFromLatest();
         Schema schema = new Schema();
         TableSchema tableSchema1 = TableSchema.builder()
+                .field("rowtime", DataTypes.STRING())
                 .field("amount", DataTypes.INT())
                 .field("currency", DataTypes.STRING())
                 .build();
@@ -53,13 +55,13 @@ public class WriteToKafkaByKafkaConnectorOfOrder {
         tableSource.createTemporaryTable("Orders");
 
         ArrayList data = new ArrayList();
-        data.add(new Current1(2, "Euro"));
+        data.add(new Current1( new Date().getTime() + "",2, "Euro"));
 
         DataStreamSource dataDS = env.fromCollection(data);
         Table dataTable = blinkTableEnv.fromDataStream(dataDS);
         blinkTableEnv.registerTable("source", dataTable);
 
-        String sql = "insert into Orders select * from source";
+        String sql = "insert into Orders select rowtime, amount, currency from source";
 
         blinkTableEnv.sqlUpdate(sql);
 

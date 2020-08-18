@@ -43,4 +43,13 @@ public class Rate {
     public void setRate(int rate) {
         this.rate = rate;
     }
+
+    @Override
+    public String toString() {
+        return "Rate{" +
+                "rowtime='" + rowtime + '\'' +
+                ", currency='" + currency + '\'' +
+                ", rate=" + rate +
+                '}';
+    }
 }
