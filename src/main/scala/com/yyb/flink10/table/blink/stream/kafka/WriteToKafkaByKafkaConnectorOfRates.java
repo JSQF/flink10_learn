@@ -60,6 +60,7 @@ public class WriteToKafkaByKafkaConnectorOfRates {
 
         ArrayList data = new ArrayList();
         data.add(new Rate(new Date().getTime() + "", "Euro", 120));
+        data.add(new Rate(new Date().getTime() + "", "Euro", 121));
 
         DataStreamSource dataDS = env.fromCollection(data);
         Table dataTable = blinkTableEnv.fromDataStream(dataDS);

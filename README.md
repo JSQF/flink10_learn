@@ -257,6 +257,14 @@ The main difference to a retract stream is that UPDATE changes are
 encoded with a single message and are therefore more efficient.   
 [代码可见](./src/main/scala/com/yyb/flink10/table/flink/stream/JDBC/InsetMode/UpsertStream.java)  
 
+### join  
+#### 双流join  
+[参考文档](#http://www.360doc.com/content/19/0904/17/14808334_859110520.shtml)  
+不论是INNER JOIN还是OUTER JOIN 都需要对左右两边的流的数据进行保存，JOIN算子会开辟左右两个State进行数据存储，左右两边的数据到来时候，进行如下操作：  
+1. LeftEvent到来存储到LState，RightEvent到来的时候存储到RState；  
+2. LeftEvent会去RightState进行JOIN，并发出所有JOIN之后的Event到下游；  
+3. RightEvent会去LeftState进行JOIN，并发出所有JOIN之后的Event到下游  
+
 ## State
 ### Using Managed Keyed State  
 [代码可见](./src/main/scala/com/yyb/flink10/DataStream/State/StateOfCountWindowAverage.java)  

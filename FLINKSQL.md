@@ -243,6 +243,18 @@ WHERE o.id = s.orderId AND
 只支持有时间属性的表 join  
 ## Join with a Temporal Table Function  
 即 你可以使用 Temporal Table 或者 使用 Temporal Table Function,但是需要注意维表的信息更新的话，Temporal Table 不会及时更新的    
+在使用时态表(Temporal Table)时，要注意以下问题:  
+1. Temporal Table可提供历史某个时间点上的数据。  
+2. Temporal Table根据时间来跟踪版本。  
+3. Temporal Table需要提供时间属性和主键。  
+4. Temporal Table一般和关键词LATERAL TABLE结合使用。  
+5. Temporal Table在基于ProcessingTime时间属性处理时，每个主键只保存最新版本的数据。  
+6. Temporal Table在基于EventTime时间属性处理时，每个主键保存从上个Watermark到当前系统时间的所有版本。  
+7. 左侧Append-Only表Join右侧Temporal Table，本质上还是左表驱动Join，即从左表拿到Key，根据Key和时间(可能是历史时间)去右侧Temporal Table表中查询。  
+8. Temporal Table Join目前只支持Inner Join。  
+9. Temporal Table Join时，右侧Temporal Table表返回最新一个版本的数据。举个栗子，左侧事件时间如是2016-01-01 00:00:01秒，Join时，只会从右侧Temporal Table中选取<=2016-01-01 00:00:01的最新版本的数据。  
+TODO: 在EventTime下，左表WaterMark、右表Temporal Table WaterMark,以及乱序时间之间，关系到底是啥，还需深究。  
+
 ### temporal tables 时态表  
 时态表函数，不能可以通过sql直接查询某个时间点下的 时态表的数据,只能在join过程中使用这个时态表函数的数据    
 [参考](https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/streaming/temporal_tables.html#temporal-table)  

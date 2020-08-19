@@ -12,15 +12,13 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
-import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableSchema;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
+import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.types.Row;
 
 import java.io.InputStream;
@@ -37,6 +35,10 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment blinkTableEnv = StreamTableEnvironment.create(env, settings);
+
+        //注意配置这里，可能导致 其他的问题
+//        TableConfig tConfig = blinkTableEnv.getConfig();
+//        tConfig.setIdleStateRetentionTime(org.apache.flink.api.common.time.Time.minutes(1), org.apache.flink.api.common.time.Time.minutes(6));
 
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         env.enableCheckpointing(3000);
@@ -70,10 +72,10 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
         });
         streamOrder.assignTimestampsAndWatermarks(new TimestampExtractorOrder(Time.seconds(0)));
 //        oederDS.print().setParallelism(1);
-        Table orders = blinkTableEnv.fromDataStream(streamOrder, "amount,currency,user_action_time.rowtime");
+        Table orders = blinkTableEnv.fromDataStream(streamOrder, "rowtime,amount,currency,user_action_time.rowtime");
         blinkTableEnv.registerTable("Orders", orders);
-        DataStream<Row> orderPC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select *, '---' from Orders"), Row.class);
-        orderPC.print().setParallelism(1);
+//        DataStream<Row> orderPC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select *, 'Orders' from Orders"), Row.class);
+//        orderPC.print().setParallelism(1);
 
         /**
          * Rates kafka
@@ -89,29 +91,32 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
             }
         });
         rate.assignTimestampsAndWatermarks(new TimestampExtractorRate(Time.seconds(0)));
-        Table rates = blinkTableEnv.fromDataStream(rate, "currency,rate,user_action_time.rowtime");
-        DataStream<Row> xx = blinkTableEnv.toAppendStream(rates, Row.class);
-        xx.print().setParallelism(1);
-//        blinkTableEnv.registerTable("Rates", rates);
-//        DataStream<Row> ratePC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select *, '---' from Rates"), Row.class);
+
+
+        Table rates = blinkTableEnv.fromDataStream(rate, "rowtime,currency,rate,user_action_time.rowtime");
+        blinkTableEnv.registerTable("Rates", rates);
+//        DataStream<Row> ratePC = blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery("select *, 'Rates' from Rates"), Row.class);
 //        ratePC.print().setParallelism(1);
-//
-//        TemporalTableFunction ratesF = rates.createTemporalTableFunction("user_action_time", "currency");
-//        blinkTableEnv.registerFunction("RatesF", ratesF);
 
+        TemporalTableFunction ratesF = rates.createTemporalTableFunction("user_action_time", "currency");
+        blinkTableEnv.registerFunction("RatesF", ratesF);
 
+        // CASET , TO_TIMESTAMP
 
-        /**
-         * 注意 使用 temporal table 作为 维表的时候，当维表 有更新的时候，temporal table 不会更新的
-         *
-         * 但是 使用 lookup function 的时候 是可以更新的 (不能配置 缓存时间 和 条数)， 但是就不是 temporal table 了
-         */
-//        String sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount, 'hahahah' from Orders as o , LATERAL TABLE (RatesF(o.user_action_time)) as r WHERE o.currency = r.currency";
-//        Table rs1 = blinkTableEnv.sqlQuery(sql1);
-//        DataStream<Row> rs1DS = blinkTableEnv.toAppendStream(rs1, Row.class);
-//        rs1DS.print().setParallelism(1);
+        String sql = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount, o.rowtime, r.rowtime, 'inner' from Orders as o inner join Rates as r on o.currency = r.currency";
+        blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery(sql), Row.class).print();
 
-        blinkTableEnv.execute("JoinWithTeporalTableFunction");
+        String sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount, 'hahahah' " +
+                "from Orders as o , " +
+                "LATERAL TABLE (RatesF(o.user_action_time)) as r " +
+                "WHERE o.currency = r.currency";
+        //等值 join 的时候，是会出现结果的，设置 TableConfig 放置 内存占用过大
+//        String sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount, o.rowtime, r.rowtime, 'hahaha' from Orders as o inner join Rates r on o.currency = r.currency";
+        Table rs1 = blinkTableEnv.sqlQuery(sql1);
+        DataStream<Row> rs1DS = blinkTableEnv.toAppendStream(rs1, Row.class);
+        rs1DS.print().setParallelism(1);
+
+        env.execute("JoinWithTeporalTableFunction");
 
 
 
@@ -136,7 +141,7 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
         }
         @Override
         public long extractTimestamp(Rate element) {
-            System.out.println("here:" + element);
+//            System.out.println("here:" + element);
             return Long.parseLong(element.getRowtime());
         }
     }
