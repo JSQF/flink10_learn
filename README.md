@@ -313,4 +313,29 @@ KeyedProcessFunction 在内部使用了 Keyed State。
     	at org.datanucleus.store.rdbms.table.AbstractTable.exists(AbstractTable.java:606)
     	at org.datanucleus.store.rdbms.RDBMSStoreManager$ClassAdder.performTablesValidation(RDBMSStoreManager.java:3385)
 
-解决方式就是 指定 hiveConfDir 目录。[可参见代码](./src/main/scala/com/yyb/flink10/table/blink/DataSet/BlinkHiveBatchDemo.scala)
+解决方式就是 指定 hiveConfDir 目录。[可参见代码](./src/main/scala/com/yyb/flink10/table/blink/DataSet/BlinkHiveBatchDemo.scala)  
+### kafka table source 转化为 dataStream 增加 rowtime 问题  
+当使用 kafka table source 转化为 dataStream 增加 rowtime 的时候，在运行的时候，  
+会出现 空指针 异常的错误，那么只能使用 kafkaConsumer 了。  
+### 使用 WaterMark 时候 UI界面一直没有Watermark 产生  
+可能的原因就是 使用的方式不对，必须在操作 数据的时候 链式编程指定 assignTimestampsAndWatermarks：  
+```
+DataStream<Current1> streamOrder = streamOrderStr.map(new MapFunction<String, Current1>() {
+            @Override
+            public Current1 map(String value) throws Exception {
+                Current1 current1 = JSON.parseObject(value, Current1.class);
+                return current1;
+            }
+        }).assignTimestampsAndWatermarks(new TimestampExtractorOrder(Time.seconds(0)));
+```   
+而不是 变量.xx 的方法指定 assignTimestampsAndWatermarks：   
+```
+DataStream<Current1> streamOrder = streamOrderStr.map(new MapFunction<String, Current1>() {
+               @Override
+               public Current1 map(String value) throws Exception {
+                   Current1 current1 = JSON.parseObject(value, Current1.class);
+                   return current1;
+               }
+           });
+streamOrder.assignTimestampsAndWatermarks(new TimestampExtractorOrder(Time.seconds(0)));
+```   

@@ -263,3 +263,13 @@ TODO: 在EventTime下，左表WaterMark、右表Temporal Table WaterMark,以及�
 [参考](https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/streaming/temporal_tables.html#temporal-table-function)  
 ## Join with a Lookup Function   
 这个 Lookup Function 的作用就是 去查 数据源的数据，如果没有配置 缓存的话，就是 实时查询 数据源的  
+
+## 双流join  
+[参考文档](#http://www.360doc.com/content/19/0904/17/14808334_859110520.shtml)  
+不论是INNER JOIN还是OUTER JOIN 都需要对左右两边的流的数据进行保存，JOIN算子会开辟左右两个State进行数据存储，左右两边的数据到来时候，进行如下操作：  
+1. LeftEvent到来存储到LState，RightEvent到来的时候存储到RState；  
+2. LeftEvent会去RightState进行JOIN，并发出所有JOIN之后的Event到下游；  
+3. RightEvent会去LeftState进行JOIN，并发出所有JOIN之后的Event到下游  
+## 流 维度表
+[参考文档](.https://blog.csdn.net/wangpei1949/article/details/103541939)  
+

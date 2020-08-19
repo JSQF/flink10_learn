@@ -2,6 +2,7 @@ package com.yyb.flink10.table.blink.stream.kafka;
 
 import com.yyb.flink10.commonEntity.Current1;
 import com.yyb.flink10.commonEntity.Rate;
+import com.yyb.flink10.commonEntity.Rate2;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
@@ -51,6 +52,7 @@ public class WriteToKafkaByKafkaConnectorOfRates {
                 .field("rowtime", DataTypes.STRING())
                 .field("currency", DataTypes.STRING())
                 .field("rate", DataTypes.INT())
+                .field("eventTime", DataTypes.BIGINT())
                 .build();
         schema.schema(tableSchema1);
         ConnectTableDescriptor tableSource = blinkTableEnv.connect(kafka)
@@ -59,14 +61,13 @@ public class WriteToKafkaByKafkaConnectorOfRates {
         tableSource.createTemporaryTable("Rates");
 
         ArrayList data = new ArrayList();
-        data.add(new Rate(new Date().getTime() + "", "Euro", 120));
-        data.add(new Rate(new Date().getTime() + "", "Euro", 121));
+        data.add(new Rate2("2016-01-01 00:00:02", "Euro", 120, 0L));
 
         DataStreamSource dataDS = env.fromCollection(data);
         Table dataTable = blinkTableEnv.fromDataStream(dataDS);
         blinkTableEnv.registerTable("source", dataTable);
 
-        String sql = "insert into Rates select rowtime,currency,rate from source";
+        String sql = "insert into Rates select rowtime,currency,rate,eventTime from source";
 
         blinkTableEnv.sqlUpdate(sql);
 

@@ -2,13 +2,17 @@ package com.yyb.flink10.table.blink.stream.join.temporaltable;
 
 import com.alibaba.fastjson.JSON;
 import com.yyb.flink10.commonEntity.Current1;
+import com.yyb.flink10.commonEntity.Current2;
 import com.yyb.flink10.commonEntity.Rate;
+import com.yyb.flink10.commonEntity.Rate2;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
@@ -20,8 +24,13 @@ import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.descriptors.Schema;
 import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.types.Row;
+import org.apache.flink.util.Collector;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 /**
@@ -63,14 +72,19 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
          */
         FlinkKafkaConsumer011<String> kafkaSourceOrder = new FlinkKafkaConsumer011<String>("eventsource_yyb_order", new SimpleStringSchema(), properties);
         DataStream<String> streamOrderStr = env.addSource(kafkaSourceOrder);
-        DataStream<Current1> streamOrder = streamOrderStr.map(new MapFunction<String, Current1>() {
+        DataStream<Current2> streamOrder = streamOrderStr.map(new MapFunction<String, Current2>() {
             @Override
-            public Current1 map(String value) throws Exception {
-                Current1 current1 = JSON.parseObject(value, Current1.class);
-                return current1;
+            public Current2 map(String value) throws Exception {
+                Current2 current = JSON.parseObject(value, Current2.class);
+                DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                OffsetDateTime eventTime = LocalDateTime.parse(current.getRowtime(), format).atOffset(ZoneOffset.of("+08:00"));
+                // 转换成毫秒时间戳
+                long eventTimeTimestamp = eventTime.toInstant().toEpochMilli();
+                current.setEventTime(eventTimeTimestamp);
+                return current;
             }
-        });
-        streamOrder.assignTimestampsAndWatermarks(new TimestampExtractorOrder(Time.seconds(0)));
+        }).assignTimestampsAndWatermarks(new TimestampExtractorOrder(Time.seconds(0)));
+
 //        oederDS.print().setParallelism(1);
         Table orders = blinkTableEnv.fromDataStream(streamOrder, "rowtime,amount,currency,user_action_time.rowtime");
         blinkTableEnv.registerTable("Orders", orders);
@@ -83,14 +97,18 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
 
         FlinkKafkaConsumer011<String> kafkaSource = new FlinkKafkaConsumer011<String>("eventsource_yyb_rate", new SimpleStringSchema(), properties);
         DataStream<String> stream = env.addSource(kafkaSource);
-        DataStream<Rate> rate = stream.map(new MapFunction<String, Rate>() {
+        DataStream<Rate2> rate = stream.map(new MapFunction<String, Rate2>() {
             @Override
-            public Rate map(String value) throws Exception {
-                Rate rate = JSON.parseObject(value, Rate.class);
+            public Rate2 map(String value) throws Exception {
+                Rate2 rate = JSON.parseObject(value, Rate2.class);
+                DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                OffsetDateTime eventTime = LocalDateTime.parse(rate.getRowtime(), format).atOffset(ZoneOffset.of("+08:00"));
+                // 转换成毫秒时间戳
+                long eventTimeTimestamp = eventTime.toInstant().toEpochMilli();
+                rate.setEventTime(eventTimeTimestamp);
                 return rate;
             }
-        });
-        rate.assignTimestampsAndWatermarks(new TimestampExtractorRate(Time.seconds(0)));
+        }).assignTimestampsAndWatermarks(new TimestampExtractorRate(Time.seconds(0)));
 
 
         Table rates = blinkTableEnv.fromDataStream(rate, "rowtime,currency,rate,user_action_time.rowtime");
@@ -104,9 +122,9 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
         // CASET , TO_TIMESTAMP
 
         String sql = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount, o.rowtime, r.rowtime, 'inner' from Orders as o inner join Rates as r on o.currency = r.currency";
-        blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery(sql), Row.class).print();
+//        blinkTableEnv.toAppendStream(blinkTableEnv.sqlQuery(sql), Row.class).print();
 
-        String sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount, 'hahahah' " +
+        String sql1 = "select o.currency,o.amount,r.rate,o.amount * r.rate AS amount, 'hahahah o-r', o.rowtime, r.rowtime  " +
                 "from Orders as o , " +
                 "LATERAL TABLE (RatesF(o.user_action_time)) as r " +
                 "WHERE o.currency = r.currency";
@@ -123,26 +141,44 @@ public class JoinWithKafkaConsumerTeporalTableFunction {
     }
 
 
-    static class TimestampExtractorOrder extends BoundedOutOfOrdernessTimestampExtractor<Current1> {
+    static class TimestampExtractorOrder extends BoundedOutOfOrdernessTimestampExtractor<Current2> {
 
         public TimestampExtractorOrder(Time maxOutOfOrderness){
             super(maxOutOfOrderness);
         }
         @Override
-        public long extractTimestamp(Current1 element) {
-            return Long.parseLong(element.getRowtime());
+        public long extractTimestamp(Current2 element) {
+            return element.getEventTime();
         }
     }
 
-    static class TimestampExtractorRate extends BoundedOutOfOrdernessTimestampExtractor<Rate> {
+    static class TimestampExtractorRate extends BoundedOutOfOrdernessTimestampExtractor<Rate2> {
 
         public TimestampExtractorRate(Time maxOutOfOrderness){
             super(maxOutOfOrderness);
         }
         @Override
-        public long extractTimestamp(Rate element) {
+        public long extractTimestamp(Rate2 element) {
 //            System.out.println("here:" + element);
-            return Long.parseLong(element.getRowtime());
+            return element.getEventTime();
+        }
+    }
+
+    static class OrderProcessFunction extends ProcessFunction<String, Current1>{
+
+        @Override
+        public void processElement(String value, Context ctx, Collector<Current1> out) throws Exception {
+            Current1 current1 = JSON.parseObject(value, Current1.class);
+            out.collect(current1);
+        }
+    }
+
+    static class RateProcessFunction extends ProcessFunction<String, Rate>{
+
+        @Override
+        public void processElement(String value, Context ctx, Collector<Rate> out) throws Exception {
+            Rate rate = JSON.parseObject(value, Rate.class);
+            out.collect(rate);
         }
     }
 }
