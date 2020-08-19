@@ -35,7 +35,7 @@ import java.util.Properties;
 
 /**
  * @Author yyb
- * @Description kafka 作为 流式维度表
+ * @Description kafka 作为 流式维度表 ok
  * @Date Create in 2020-07-27
  * @Time 16:59
  */

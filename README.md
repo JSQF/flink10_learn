@@ -204,6 +204,9 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 7. Blink 优化多个 sink 对于一个DAG（只有 TableEnvironment， 不支持 StreamTableEnvironment ）；old flink planner 总是优化 每个 sink 在新的 DAG。
 8. old flink planner 不再支持 catalog statistics，Blink 则支持。
 
+### TableConfig  
+可以通过 TableConfig 配置 state 的过期时间等等  
+
 ### Flink Batch Table
 1. 可以从 DataSet 转化到 Table
 2. 可以把 Table 转化到 DataSet
