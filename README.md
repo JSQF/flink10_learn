@@ -190,6 +190,16 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 [查看示例](./src/main/scala/com/yyb/flink10/table/flink/stream/kafka/SendData2KafkaByKafkaConnector.scala)  
 ##### blink stream table write to kafka  
 [查看示例](./src/main/scala/com/yyb/flink10/table/blink/stream/kafka/WriteToKafkaByKafkaConnector.java)  
+#### Elasticsearch  
+##### Maven Dependency
+```
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-connector-elasticsearch7_2.11</artifactId>
+    <version>${flink.version}</version>
+    <scope>${slef.scope}</scope>
+</dependency>
+```   
 
 
 
