@@ -248,6 +248,13 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 ### Connect to External Systems
 #### Filesystem
 #### Elasticsearch
+注意有的时候，需要排除 jackson 低版本的依赖：   
+```
+NoSuchFieldError: FAIL_ON_SYMBOL_HASH_OVERFLOW问题解决
+```   
+当发现 数据无法 插入到 es的时候，可以 env.disableOperatorChaining(); 看看有什么错误！！！  
+  
+
 #### Apache Kafka
 1. 需要添加依赖 
         <dependency>

@@ -19,7 +19,9 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.utils.TableSchemaUtils;
+import org.apache.flink.table.descriptors.Elasticsearch;
+import org.apache.flink.table.descriptors.Json;
+import org.apache.flink.table.descriptors.Schema;
 import org.apache.flink.types.Row;
 import org.elasticsearch.common.xcontent.XContentType;
 
@@ -32,11 +34,11 @@ import java.util.*;
 
 /**
  * @Author yyb
- * @Description ok 可以使用用户名和密码 但是 还没有知道 如何指定用户名密码？下面已经解决了这个问题
+ * @Description ok 可以指定列名
  * @Date Create in 2020-08-20
  * @Time 09:40
  */
-public class WriteData2EsBySink {
+public class WriteData2EsByTableDesc {
     public static void main(String[] args) throws Exception {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -88,7 +90,7 @@ public class WriteData2EsBySink {
          * 注意 cast 函数可以把  TimeStamp 转化为 long 型的 时间，但此时的 是 精确到 秒的，而不是 毫秒的。
          * CAST(user_action_time as bigint)
          */
-        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint)* 1000 user_action_time from Orders");
+        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint) from Orders");
         tsTable.printSchema();
         DataStream<Row> orderPC = blinkTableEnv.toAppendStream(tsTable, Row.class);
         orderPC.print().setParallelism(1);
@@ -97,42 +99,18 @@ public class WriteData2EsBySink {
         /**
          * ES Table Sink
          */
-        List<ElasticsearchUpsertTableSinkBase.Host> hosts= new ArrayList<>();
-        String ESProtocol = prop.getProperty("es.protocol");
-        String esHosts = prop.getProperty("es.hosts");
-        String esUser = prop.getProperty("es.username");
-        String esPassword = prop.getProperty("es.password");
-        for(String host : esHosts.split(",")){
-            String[] hostStr = host.split(":");
-            hosts.add(new ElasticsearchUpsertTableSinkBase.Host(hostStr[0], Integer.parseInt(hostStr[1]), ESProtocol));
-        }
+        Elasticsearch es = new Elasticsearch()
+                .version("7")
+                .host("172.16.11.104", 9200, "http")
+                .documentType("_doc")
+                .index("flink_sink_dev");
 
+        blinkTableEnv.connect(es)
+                .withSchema(new Schema().schema(tsTable.getSchema()))
+                .withFormat(new Json().deriveSchema())
+                .inAppendMode()
+                .registerTableSink("ESSink");
 
-        //注意使用这个 构造方法 构造 es 的 列名
-        RowTypeInfo typeInfo = new RowTypeInfo(tsTable.getSchema().getFieldTypes(), tsTable.getSchema().getFieldNames());
-
-        JsonRowSerializationSchema serializationSchema = new JsonRowSerializationSchema.Builder(typeInfo).build();
-
-        Map<ElasticsearchUpsertTableSinkBase.SinkOption, String> sinkOptions = new HashMap<>();
-
-
-
-        Elasticsearch7UpsertTableSinkPlus ES7UpsertTableSink = new Elasticsearch7UpsertTableSinkPlus(
-                true,
-                TableSchemaUtils.getPhysicalSchema(tsTable.getSchema()),
-                hosts,
-                "flink_sink_dev",
-                "_",
-                "n/a",
-                serializationSchema,
-                XContentType.JSON,
-                new NoOpFailureHandler(),
-                sinkOptions,
-                esUser,
-                esPassword
-        );
-
-        blinkTableEnv.registerTableSink("ESSink", ES7UpsertTableSink);
 
         blinkTableEnv.insertInto("ESSink", tsTable);
 

@@ -15,11 +15,12 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.Elasticsearch7UpsertTableSinkPlus;
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchUpsertTableSinkBase;
 import org.apache.flink.streaming.connectors.elasticsearch.util.NoOpFailureHandler;
+import org.apache.flink.streaming.connectors.elasticsearch7.Elasticsearch7UpsertTableSink;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.utils.TableSchemaUtils;
+import org.apache.flink.table.descriptors.Elasticsearch;
 import org.apache.flink.types.Row;
 import org.elasticsearch.common.xcontent.XContentType;
 
@@ -32,11 +33,11 @@ import java.util.*;
 
 /**
  * @Author yyb
- * @Description ok 可以使用用户名和密码 但是 还没有知道 如何指定用户名密码？下面已经解决了这个问题
+ * @Description Elasticsearch7UpsertTableSink ok 需要注意列名,下面已经解决了这个问题
  * @Date Create in 2020-08-20
  * @Time 09:40
  */
-public class WriteData2EsBySink {
+public class WriteData2EsBySinkTestEnv {
     public static void main(String[] args) throws Exception {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -49,6 +50,7 @@ public class WriteData2EsBySink {
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(3);
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        env.getCheckpointConfig().setCheckpointTimeout(3000);
 
         env.getConfig().setAutoWatermarkInterval(1000);
 
@@ -88,7 +90,8 @@ public class WriteData2EsBySink {
          * 注意 cast 函数可以把  TimeStamp 转化为 long 型的 时间，但此时的 是 精确到 秒的，而不是 毫秒的。
          * CAST(user_action_time as bigint)
          */
-        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint)* 1000 user_action_time from Orders");
+        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint) user_action_time from Orders");
+        blinkTableEnv.registerTable("tsTable", tsTable);
         tsTable.printSchema();
         DataStream<Row> orderPC = blinkTableEnv.toAppendStream(tsTable, Row.class);
         orderPC.print().setParallelism(1);
@@ -108,7 +111,6 @@ public class WriteData2EsBySink {
         }
 
 
-        //注意使用这个 构造方法 构造 es 的 列名
         RowTypeInfo typeInfo = new RowTypeInfo(tsTable.getSchema().getFieldTypes(), tsTable.getSchema().getFieldNames());
 
         JsonRowSerializationSchema serializationSchema = new JsonRowSerializationSchema.Builder(typeInfo).build();
@@ -117,9 +119,9 @@ public class WriteData2EsBySink {
 
 
 
-        Elasticsearch7UpsertTableSinkPlus ES7UpsertTableSink = new Elasticsearch7UpsertTableSinkPlus(
+        Elasticsearch7UpsertTableSink ES7UpsertTableSink = new Elasticsearch7UpsertTableSink(
                 true,
-                TableSchemaUtils.getPhysicalSchema(tsTable.getSchema()),
+                tsTable.getSchema(),
                 hosts,
                 "flink_sink_dev",
                 "_",
@@ -127,16 +129,20 @@ public class WriteData2EsBySink {
                 serializationSchema,
                 XContentType.JSON,
                 new NoOpFailureHandler(),
-                sinkOptions,
-                esUser,
-                esPassword
+                sinkOptions
         );
 
         blinkTableEnv.registerTableSink("ESSink", ES7UpsertTableSink);
 
-        blinkTableEnv.insertInto("ESSink", tsTable);
+        //这种方式 写进去的话，es 的 列名是 f0,f1,...
+//        blinkTableEnv.insertInto("ESSink", tsTable);
+        //这种方式 写进去的话，es 的 列名也是 f0,f1,...，需要 进一步找出 怎么指定列名
+        String insertSQL = "insert into ESSink select rowtime ,amount,currency,user_action_time from tsTable";
+        blinkTableEnv.sqlUpdate(insertSQL);
+
 
         env.execute("WriteData2EsBySink");
+
 
     }
 

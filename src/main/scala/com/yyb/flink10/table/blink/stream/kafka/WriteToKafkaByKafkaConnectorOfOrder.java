@@ -57,7 +57,7 @@ public class WriteToKafkaByKafkaConnectorOfOrder {
         tableSource.createTemporaryTable("Orders");
 
         ArrayList data = new ArrayList();
-        data.add(new Current2( "2016-01-01 00:00:03",3, "Euro", 0L));
+        data.add(new Current2( "2016-01-01 00:00:00",3, "Euro", 0L));
 
         DataStreamSource dataDS = env.fromCollection(data);
         Table dataTable = blinkTableEnv.fromDataStream(dataDS);

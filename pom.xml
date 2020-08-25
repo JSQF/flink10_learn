@@ -194,7 +194,11 @@ under the License.
                     <groupId>org.apache.hive</groupId>
                     <artifactId>hive-common</artifactId>
                 </exclusion>
-            </exclusions>
+				<exclusion>
+					<artifactId>calcite-avatica</artifactId>
+					<groupId>org.apache.calcite</groupId>
+				</exclusion>
+			</exclusions>
             <!--<scope>provided</scope>-->
         </dependency>
 
@@ -300,7 +304,7 @@ under the License.
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-elasticsearch7_2.11</artifactId>
 			<version>${flink.version}</version>
-			<scope>${slef.scope}</scope>
+<!--			<scope>${slef.scope}</scope>-->
 		</dependency>
 
 		<dependency>
@@ -482,6 +486,15 @@ under the License.
 				<slef.scope>compile</slef.scope>
 				<zookeeper.connect>172.16.10.16:2181,172.16.10.17:2181,172.16.10.18:2181</zookeeper.connect>
 				<bootstrap.servers>172.16.10.19:9092,172.16.10.26:9092,172.16.10.27:9092</bootstrap.servers>
+			</properties>
+
+		</profile>
+		<profile>
+			<id>test</id>
+			<properties>
+				<slef.scope>compile</slef.scope>
+				<zookeeper.connect>njtest-cdh6-nn01.nj:2181,njtest-cdh6-nn02.nj:2181,njtest-cdh6-nn03.nj:2181</zookeeper.connect>
+				<bootstrap.servers>172.16.11.17:9092,172.16.11.18:9092,172.16.11.19:9092</bootstrap.servers>
 			</properties>
 
 		</profile>

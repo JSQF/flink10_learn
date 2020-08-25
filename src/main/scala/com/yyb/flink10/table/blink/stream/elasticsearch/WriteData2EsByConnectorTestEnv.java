@@ -12,14 +12,13 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.connectors.Elasticsearch7UpsertTableSinkPlus;
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchUpsertTableSinkBase;
 import org.apache.flink.streaming.connectors.elasticsearch.util.NoOpFailureHandler;
+import org.apache.flink.streaming.connectors.elasticsearch7.Elasticsearch7UpsertTableSink;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.utils.TableSchemaUtils;
 import org.apache.flink.types.Row;
 import org.elasticsearch.common.xcontent.XContentType;
 
@@ -32,11 +31,11 @@ import java.util.*;
 
 /**
  * @Author yyb
- * @Description ok 可以使用用户名和密码 但是 还没有知道 如何指定用户名密码？下面已经解决了这个问题
+ * @Description OK，列名 可以指定 但是 不支持 es 的用户名和密码
  * @Date Create in 2020-08-20
  * @Time 09:40
  */
-public class WriteData2EsBySink {
+public class WriteData2EsByConnectorTestEnv {
     public static void main(String[] args) throws Exception {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -49,6 +48,8 @@ public class WriteData2EsBySink {
         env.getCheckpointConfig().setTolerableCheckpointFailureNumber(3);
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        env.getCheckpointConfig().setCheckpointTimeout(3000);
+        env.disableOperatorChaining();
 
         env.getConfig().setAutoWatermarkInterval(1000);
 
@@ -88,55 +89,45 @@ public class WriteData2EsBySink {
          * 注意 cast 函数可以把  TimeStamp 转化为 long 型的 时间，但此时的 是 精确到 秒的，而不是 毫秒的。
          * CAST(user_action_time as bigint)
          */
-        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint)* 1000 user_action_time from Orders");
+        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint) * 1000 user_action_time  from Orders");
         tsTable.printSchema();
         DataStream<Row> orderPC = blinkTableEnv.toAppendStream(tsTable, Row.class);
         orderPC.print().setParallelism(1);
 
 
         /**
-         * ES Table Sink
+         * ES Table connector
          */
-        List<ElasticsearchUpsertTableSinkBase.Host> hosts= new ArrayList<>();
-        String ESProtocol = prop.getProperty("es.protocol");
-        String esHosts = prop.getProperty("es.hosts");
-        String esUser = prop.getProperty("es.username");
-        String esPassword = prop.getProperty("es.password");
-        for(String host : esHosts.split(",")){
-            String[] hostStr = host.split(":");
-            hosts.add(new ElasticsearchUpsertTableSinkBase.Host(hostStr[0], Integer.parseInt(hostStr[1]), ESProtocol));
-        }
 
+        String esConnectorSQl = "CREATE TABLE ESSink(" +
+                "rowtime varchar, "+
+                "amount int, "+
+                "currency varchar, "+
+                "user_action_time bigint "+
+                ")WITH(" +
+                "'connector.type' = 'elasticsearch'," +
+                "'connector.version' = '7'," +
+                "'connector.hosts' = 'http://172.16.11.104:9200;http://172.16.11.66:9200;http://172.16.11.67:9200'," +
+                "'connector.index' = 'flink_sink_dev'," +
+                "'connector.document-type' = 'user'," +
+                "'update-mode' = 'append'," +
+                "'connector.key-delimiter' = '_'," +
+                "'connector.key-null-literal' = 'n/a'," +
+                "'connector.flush-on-checkpoint' = 'true'," +
+                "'connector.bulk-flush.max-actions' = '42'," +
+                "'connector.bulk-flush.backoff.max-retries' = '3'," +
+                "'format.type' = 'json'" +
+                ")" ;
 
-        //注意使用这个 构造方法 构造 es 的 列名
-        RowTypeInfo typeInfo = new RowTypeInfo(tsTable.getSchema().getFieldTypes(), tsTable.getSchema().getFieldNames());
-
-        JsonRowSerializationSchema serializationSchema = new JsonRowSerializationSchema.Builder(typeInfo).build();
-
-        Map<ElasticsearchUpsertTableSinkBase.SinkOption, String> sinkOptions = new HashMap<>();
-
-
-
-        Elasticsearch7UpsertTableSinkPlus ES7UpsertTableSink = new Elasticsearch7UpsertTableSinkPlus(
-                true,
-                TableSchemaUtils.getPhysicalSchema(tsTable.getSchema()),
-                hosts,
-                "flink_sink_dev",
-                "_",
-                "n/a",
-                serializationSchema,
-                XContentType.JSON,
-                new NoOpFailureHandler(),
-                sinkOptions,
-                esUser,
-                esPassword
-        );
-
-        blinkTableEnv.registerTableSink("ESSink", ES7UpsertTableSink);
+        System.out.println(esConnectorSQl);
+        blinkTableEnv.sqlUpdate(esConnectorSQl);
 
         blinkTableEnv.insertInto("ESSink", tsTable);
 
+
+
         env.execute("WriteData2EsBySink");
+
 
     }
 
