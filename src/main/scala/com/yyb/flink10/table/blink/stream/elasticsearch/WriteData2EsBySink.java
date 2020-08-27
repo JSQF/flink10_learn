@@ -88,7 +88,7 @@ public class WriteData2EsBySink {
          * 注意 cast 函数可以把  TimeStamp 转化为 long 型的 时间，但此时的 是 精确到 秒的，而不是 毫秒的。
          * CAST(user_action_time as bigint)
          */
-        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint)* 1000 user_action_time from Orders");
+        Table tsTable = blinkTableEnv.sqlQuery("select rowtime ,amount,currency, CAST(user_action_time as bigint)* 1000, 0.0 user_action_time from Orders");
         tsTable.printSchema();
         DataStream<Row> orderPC = blinkTableEnv.toAppendStream(tsTable, Row.class);
         orderPC.print().setParallelism(1);
