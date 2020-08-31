@@ -22,7 +22,7 @@ under the License.
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.yyb.flink10</groupId>
-	<artifactId>flink10_learn</artifactId>
+	<artifactId>flink1.11_learn</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
@@ -45,7 +45,7 @@ under the License.
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>1.10.0</flink.version>
+		<flink.version>1.11.0</flink.version>
 		<scala.binary.version>2.11</scala.binary.version>
 		<scala.version>2.11.8</scala.version>
         <hive.version>2.1.1</hive.version>
@@ -259,7 +259,7 @@ under the License.
         <!-- connect jdbc start -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-jdbc_2.11</artifactId>
+            <artifactId>flink-connector-jdbc_2.11</artifactId>
             <version>${flink.version}</version>
 			<scope>${slef.scope}</scope>
         </dependency>
@@ -321,12 +321,6 @@ under the License.
 			<scope>${slef.scope}</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-connector-elasticsearch2_2.11</artifactId>
-			<version>${flink.version}</version>
-			<scope>${slef.scope}</scope>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
 		<dependency>
