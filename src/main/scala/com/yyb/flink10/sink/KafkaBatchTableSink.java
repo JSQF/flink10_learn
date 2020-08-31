@@ -3,6 +3,7 @@ package com.yyb.flink10.sink;
 import com.yyb.flink10.OutputFormat.KafkaOutputFormat;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.DataSet;
+import org.apache.flink.api.java.operators.DataSink;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.table.sinks.BatchTableSink;
 import org.apache.flink.table.sinks.TableSink;
@@ -24,7 +25,7 @@ public class KafkaBatchTableSink implements BatchTableSink<String> {
         this.kafkaOutputFormat = kafkaOutputFormat;
     }
 
-    @Override
+
     public void emitDataSet(DataSet<String> dataSet) {
         dataSet.output(kafkaOutputFormat);
     }
@@ -47,5 +48,10 @@ public class KafkaBatchTableSink implements BatchTableSink<String> {
     @Override
     public TypeInformation<String> getOutputType() {
         return TypeInformation.of(String.class);
+    }
+
+    @Override
+    public DataSink<?> consumeDataSet(DataSet<String> dataSet) {
+        return dataSet.output(kafkaOutputFormat);
     }
 }

@@ -1,9 +1,6 @@
 package com.yyb.flink10.table.blink.stream.join.temporaltable;
 
-import org.apache.flink.api.java.io.jdbc.JDBCLookupOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCReadOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCTableSource;
+import org.apache.flink.connector.jdbc.internal.options.JdbcLookupOptions;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -11,7 +8,7 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
@@ -32,7 +29,7 @@ public class JoinWithTeporalTableFunctionWithJDBCConnection {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment blinkTableEnv = StreamTableEnvironment.create(env, settings);
-        JDBCLookupOptions lookOption = JDBCLookupOptions.builder()
+        JdbcLookupOptions lookOption = JdbcLookupOptions.builder()
                 .setCacheExpireMs(60 * 1000)
                 .setCacheMaxSize(1024 * 1024)
                 .setMaxRetryTimes(10)

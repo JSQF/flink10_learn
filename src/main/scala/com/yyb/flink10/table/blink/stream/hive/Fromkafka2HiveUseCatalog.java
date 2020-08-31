@@ -13,7 +13,7 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.CatalogDatabaseImpl;
 import org.apache.flink.table.catalog.ConnectorCatalogTable;
 import org.apache.flink.table.catalog.ObjectPath;
@@ -67,8 +67,18 @@ public class Fromkafka2HiveUseCatalog {
         JsonRowDeserializationSchema jsonRowDeserializationSchema = new JsonRowDeserializationSchema.Builder(rowTypeINfo).build();
 //        Kafka010TableSource kafka = new Kafka010TableSource(tableSchema, "eventsource_yhj", prop, jsonRowDeserializationSchema);
         //指定 从 kafka 的 earliest 开始消费
-        Kafka010TableSource kafka = new Kafka010TableSource(tableSchema, Optional.empty(), Collections.emptyList(), Optional.empty(),"eventsource_yhj", prop, jsonRowDeserializationSchema
-                , StartupMode.EARLIEST, Collections.emptyMap());
+        Kafka010TableSource kafka = new Kafka010TableSource(
+                tableSchema,
+                Optional.empty(),
+                Collections.emptyList(),
+                Optional.empty(),
+                "eventsource_yhj",
+                prop,
+                jsonRowDeserializationSchema,
+                StartupMode.EARLIEST,
+                Collections.emptyMap(),
+                0
+        );
 
         Table kafkaTable = tableEnv.fromTableSource(kafka);
 

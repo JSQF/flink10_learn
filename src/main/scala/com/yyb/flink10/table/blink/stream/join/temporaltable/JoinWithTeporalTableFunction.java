@@ -1,9 +1,9 @@
 package com.yyb.flink10.table.blink.stream.join.temporaltable;
 
-import org.apache.flink.api.java.io.jdbc.JDBCLookupOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCReadOptions;
-import org.apache.flink.api.java.io.jdbc.JDBCTableSource;
+import org.apache.flink.connector.jdbc.internal.options.JdbcLookupOptions;
+import org.apache.flink.connector.jdbc.internal.options.JdbcOptions;
+import org.apache.flink.connector.jdbc.internal.options.JdbcReadOptions;
+import org.apache.flink.connector.jdbc.table.JdbcTableSource;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -12,7 +12,7 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Kafka;
@@ -29,11 +29,14 @@ import org.apache.flink.types.Row;
  * @Time 16:59
  */
 public class JoinWithTeporalTableFunction {
+    public JoinWithTeporalTableFunction() {
+    }
+
     public static void main(String[] args) throws Exception {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment blinkTableEnv = StreamTableEnvironment.create(env, settings);
-        JDBCLookupOptions lookOption = JDBCLookupOptions.builder()
+        JdbcLookupOptions lookOption = JdbcLookupOptions.builder()
                 .setCacheExpireMs(0)
                 .setCacheMaxSize(0)
                 .setMaxRetryTimes(3)
@@ -47,7 +50,7 @@ public class JoinWithTeporalTableFunction {
 
 
         // jdbc temportal table start
-        JDBCOptions jdbcOpition = JDBCOptions.builder()
+        JdbcOptions jdbcOpition = JdbcOptions.builder()
                 .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
                 .setDriverName("com.mysql.jdbc.Driver")
                 .setUsername("root")
@@ -55,7 +58,7 @@ public class JoinWithTeporalTableFunction {
                 .setTableName("RatesHistory")
                 .build();
 
-        JDBCReadOptions jdbcReadOption = JDBCReadOptions.builder()
+        JdbcReadOptions jdbcReadOption = JdbcReadOptions.builder()
 //                .setFetchSize(0)
                 .build();
 
@@ -65,7 +68,7 @@ public class JoinWithTeporalTableFunction {
                 .field("rate", new AtomicDataType(new IntType()))
                 .build();
 
-        JDBCTableSource jdbcTableSource = JDBCTableSource.builder()
+        JdbcTableSource jdbcTableSource = JdbcTableSource.builder()
                 .setLookupOptions(lookOption)
                 .setOptions(jdbcOpition)
                 .setReadOptions(jdbcReadOption)

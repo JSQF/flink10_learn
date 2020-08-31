@@ -18,7 +18,7 @@ import org.apache.flink.streaming.connectors.elasticsearch.util.NoOpFailureHandl
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.descriptors.Elasticsearch;
 import org.apache.flink.table.descriptors.Json;
 import org.apache.flink.table.descriptors.Schema;
@@ -109,10 +109,10 @@ public class WriteData2EsByTableDesc {
                 .withSchema(new Schema().schema(tsTable.getSchema()))
                 .withFormat(new Json().deriveSchema())
                 .inAppendMode()
-                .registerTableSink("ESSink");
+                .createTemporaryTable("ESSink");
 
 
-        blinkTableEnv.insertInto("ESSink", tsTable);
+//        blinkTableEnv.insertInto("ESSink", tsTable);
 
         env.execute("WriteData2EsBySink");
 
