@@ -2,7 +2,7 @@ package com.yyb.flink10.table.flink.batch
 
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.api.scala._
-import org.apache.flink.table.api.scala.BatchTableEnvironment
+import org.apache.flink.table.api.bridge.scala.BatchTableEnvironment
 import org.datanucleus.store.rdbms.valuegenerator.SequenceTable
 
 /**

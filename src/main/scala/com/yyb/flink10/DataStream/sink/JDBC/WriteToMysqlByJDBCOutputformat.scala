@@ -1,7 +1,7 @@
 package com.yyb.flink10.DataStream.sink.JDBC
 
 import com.yyb.flink10.DataStream.data.WordCountData
-import org.apache.flink.api.java.io.jdbc.{JDBCAppendTableSink, JDBCOutputFormat, JDBCSinkFunction}
+import org.apache.flink.api.java.io.jdbc.JDBCOutputFormat
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, _}
 import org.apache.flink.types.Row

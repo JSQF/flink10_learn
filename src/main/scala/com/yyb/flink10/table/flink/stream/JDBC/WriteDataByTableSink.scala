@@ -1,10 +1,11 @@
 package com.yyb.flink10.table.flink.stream.JDBC
 
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo
-import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink
+import org.apache.flink.connector.jdbc.internal.options.{JdbcLookupOptions, JdbcOptions, JdbcReadOptions}
+import org.apache.flink.connector.jdbc.table.{JdbcTableSource, JdbcUpsertTableSink}
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, _}
-import org.apache.flink.table.api.Table
-import org.apache.flink.table.api.scala.StreamTableEnvironment
+import org.apache.flink.table.api.{Table, TableSchema}
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
 /**
   * @Author yyb
@@ -34,18 +35,32 @@ object WriteDataByTableSink {
 
     streamTableEnv.sqlQuery("select * from wd").printSchema()
 
-
-    val jdbcAppendTableSink = JDBCAppendTableSink.builder()
-      .setBatchSize(2000)
+    val jdbcOptions = JdbcOptions.builder()
       .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
-      .setDrivername("com.mysql.jdbc.Driver")
+      .setDriverName("com.mysql.jdbc.Driver")
       .setUsername("root")
       .setPassword("111111")
-      .setQuery("insert into wordcount (word, count) values(?, ?)")
-      .setParameterTypes(java.sql.Types.VARCHAR, java.sql.Types.INTEGER)
+      .setTableName("wordcount")
       .build()
 
-    streamTableEnv.registerTableSink("mysql_wordcount", Array("word", "count"), Array(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO), jdbcAppendTableSink)
+    val schema: TableSchema = streamTableEnv.sqlQuery("select * from wd").getSchema
+
+    val jdbcReadOptions = JdbcReadOptions.builder()
+      .setFetchSize(2000)
+      .setQuery("insert into wordcount (word, count) values(?, ?)")
+      .build();
+    val jdbcLookupOptions = JdbcLookupOptions.builder()
+      .setCacheExpireMs(0)
+      .setCacheMaxSize(0)
+      .setMaxRetryTimes(3000)
+      .build();
+
+    val jdbcAppendTableSink = JdbcUpsertTableSink.builder()
+        .setOptions(jdbcOptions)
+        .build()
+
+//    streamTableEnv.registerTableSink("mysql_wordcount", Array("word", "count").asInstanceOf[String], Array(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO).asInstanceOf[String], jdbcAppendTableSink)
+    streamTableEnv.registerTableSink("mysql_wordcount", jdbcAppendTableSink)
     table.insertInto("mysql_wordcount")
 
     streamTableEnv.execute("WriteDataByTableSink")

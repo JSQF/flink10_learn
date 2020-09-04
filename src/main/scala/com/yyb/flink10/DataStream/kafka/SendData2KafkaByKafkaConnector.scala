@@ -7,7 +7,6 @@ import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema
-import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{DataTypes, EnvironmentSettings, Table, TableSchema}
 import org.apache.flink.table.descriptors.{Json, Kafka, Schema}
 

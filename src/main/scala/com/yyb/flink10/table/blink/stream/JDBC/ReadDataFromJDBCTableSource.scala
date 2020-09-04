@@ -1,9 +1,10 @@
 package com.yyb.flink10.table.blink.stream.JDBC
 
-import org.apache.flink.api.java.io.jdbc.{JDBCLookupOptions, JDBCOptions, JDBCReadOptions, JDBCTableSource}
+import org.apache.flink.connector.jdbc.internal.options.{JdbcLookupOptions, JdbcOptions, JdbcReadOptions}
+import org.apache.flink.connector.jdbc.table.JdbcTableSource
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, _}
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, Table, TableSchema}
-import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.table.types.AtomicDataType
 import org.apache.flink.table.types.logical.{DateType, IntType, VarCharType}
 
@@ -40,13 +41,13 @@ object ReadDataFromJDBCTableSource {
 
     blinkStreamTable.sqlQuery(sql).printSchema()
 
-    val lookOption =  JDBCLookupOptions.builder()
+    val lookOption =  JdbcLookupOptions.builder()
       .setCacheExpireMs(60*1000)
       .setCacheMaxSize(1024*1024)
       .setMaxRetryTimes(10)
       .build()
 
-    val jdbcOpition = JDBCOptions.builder()
+    val jdbcOpition = JdbcOptions.builder()
       .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
       .setDriverName("com.mysql.jdbc.Driver")
       .setUsername("root")
@@ -54,7 +55,7 @@ object ReadDataFromJDBCTableSource {
       .setTableName("t_order")
       .build()
 
-    val jdbcReadOption = JDBCReadOptions.builder()
+    val jdbcReadOption = JdbcReadOptions.builder()
       .setFetchSize(5000)
       .build()
 
@@ -64,7 +65,7 @@ object ReadDataFromJDBCTableSource {
       .field("time", new AtomicDataType(new DateType))
       .build()
 
-    val jdbcTableSource: JDBCTableSource =  JDBCTableSource.builder()
+    val jdbcTableSource: JdbcTableSource =  JdbcTableSource.builder()
       .setLookupOptions(lookOption)
       .setOptions(jdbcOpition)
       .setReadOptions(jdbcReadOption)

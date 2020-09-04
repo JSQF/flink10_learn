@@ -2,12 +2,13 @@ package com.yyb.flink10.table.flink.batch.JDBC
 
 import com.yyb.flink10.table.flink.batch.BatchQuery.WD
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
-import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.api.scala.typeutils.Types
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
+import org.apache.flink.connector.jdbc.internal.options.JdbcOptions
+import org.apache.flink.connector.jdbc.table.JdbcUpsertTableSink
 import org.apache.flink.table.api.Table
-import org.apache.flink.table.api.scala.BatchTableEnvironment
+import org.apache.flink.table.api.bridge.scala.BatchTableEnvironment
 
 /**
   * @Author yyb
@@ -31,15 +32,16 @@ object WriteJDBCByTableSink {
     batchTableEnv.createTemporaryView("wordcount", table)
 
 
-    val jdbcAppendTableSink: JDBCAppendTableSink = JDBCAppendTableSink.builder()
-        .setBatchSize(2000)
+    val jdbcOptions = JdbcOptions.builder()
       .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
-      .setDrivername("com.mysql.jdbc.Driver")
+      .setDriverName("com.mysql.jdbc.Driver")
       .setUsername("root")
       .setPassword("111111")
-      .setQuery("insert into wordcount (word, count) values(?, ?)")
-      .setParameterTypes(java.sql.Types.VARCHAR, java.sql.Types.INTEGER)
-        .build()
+      .setTableName("wordcount")
+      .build()
+    val jdbcAppendTableSink = JdbcUpsertTableSink.builder()
+      .setOptions(jdbcOptions)
+      .build()
 
 
     batchTableEnv.registerTableSink("wordcount_jdbc",  Array("word", "count"), Array(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO), jdbcAppendTableSink)

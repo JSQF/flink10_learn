@@ -2,8 +2,8 @@ package com.yyb.flink10.table.blink.stream
 
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, Table}
-import org.apache.flink.table.api.scala.StreamTableEnvironment
 
 /**
   * @Author yyb

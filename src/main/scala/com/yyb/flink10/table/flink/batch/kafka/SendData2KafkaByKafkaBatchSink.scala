@@ -11,8 +11,8 @@ import org.apache.flink.kafka011.shaded.org.apache.kafka.clients.producer.Produc
 import org.apache.flink.kafka011.shaded.org.apache.kafka.common.serialization.StringSerializer
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.connectors.kafka.internal.FlinkKafkaProducer
+import org.apache.flink.table.api.bridge.scala.BatchTableEnvironment
 import org.apache.flink.table.api.{DataTypes, EnvironmentSettings, Table, TableEnvironment, TableSchema}
-import org.apache.flink.table.api.scala.{BatchTableEnvironment, StreamTableEnvironment}
 import org.apache.flink.table.descriptors.{ConnectTableDescriptor, Json, Kafka, Schema}
 
 

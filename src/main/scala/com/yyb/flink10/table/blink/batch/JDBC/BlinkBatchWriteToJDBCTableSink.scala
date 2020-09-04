@@ -2,7 +2,8 @@ package com.yyb.flink10.table.blink.batch.JDBC
 
 
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo
-import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink
+import org.apache.flink.connector.jdbc.internal.options.JdbcOptions
+import org.apache.flink.connector.jdbc.table.JdbcUpsertTableSink
 import org.apache.flink.table.api.{EnvironmentSettings, Table, TableEnvironment}
 import org.apache.flink.table.sources.CsvTableSource
 import org.apache.flink.table.types.AtomicDataType
@@ -34,15 +35,15 @@ object BlinkBatchWriteToJDBCTableSink {
 
     val word: Table =  blinkBatchTableEnv.fromTableSource(csvTableSource)
 
-
-    val jdbcAppendTableSink =  JDBCAppendTableSink.builder()
-      .setBatchSize(5000)
+    val jdbcOptions = JdbcOptions.builder()
       .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
-      .setDrivername("com.mysql.jdbc.Driver")
+      .setDriverName("com.mysql.jdbc.Driver")
       .setUsername("root")
       .setPassword("111111")
-      .setQuery("insert into  wordcount (word, count) values(?, ?)")
-      .setParameterTypes(java.sql.Types.VARCHAR, java.sql.Types.INTEGER)
+      .setTableName("wordcount")
+      .build()
+    val jdbcAppendTableSink = JdbcUpsertTableSink.builder()
+      .setOptions(jdbcOptions)
       .build()
 
 

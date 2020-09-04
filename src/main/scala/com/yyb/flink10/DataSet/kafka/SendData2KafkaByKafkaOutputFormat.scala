@@ -10,7 +10,6 @@ import org.apache.flink.formats.json.JsonRowSerializationSchema
 import org.apache.flink.kafka011.shaded.org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.flink.kafka011.shaded.org.apache.kafka.common.serialization.StringSerializer
 import org.apache.flink.streaming.connectors.kafka.internal.FlinkKafkaProducer
-import org.apache.flink.table.api.scala.BatchTableEnvironment
 import org.apache.flink.table.api.{DataTypes, Table, TableSchema}
 import org.apache.flink.table.descriptors.{Json, Kafka, Schema}
 

@@ -9,8 +9,8 @@ import org.apache.flink.formats.json.JsonRowDeserializationSchema
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.Kafka010TableSource
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{DataTypes, EnvironmentSettings, Table, TableSchema}
-import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
 import org.apache.flink.table.descriptors.Schema
 

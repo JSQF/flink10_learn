@@ -1,10 +1,11 @@
 package com.yyb.flink10.table.blink.stream.JDBC
 
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo
-import org.apache.flink.api.java.io.jdbc.JDBCAppendTableSink
+import org.apache.flink.connector.jdbc.internal.options.JdbcOptions
+import org.apache.flink.connector.jdbc.table.JdbcUpsertTableSink
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment, _}
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, Table}
-import org.apache.flink.table.api.scala.StreamTableEnvironment
 
 /**
   * @Author yyb
@@ -39,14 +40,15 @@ object WriteDataByJDBCTableSink {
 
     blinkStreamTable.sqlQuery(sql).printSchema()
 
-    val jdbcAppendTableSink =  JDBCAppendTableSink.builder()
-      .setBatchSize(5000)
+    val jdbcOptions = JdbcOptions.builder()
       .setDBUrl("jdbc:mysql://127.0.0.1:3306/test?useSSL=false&serverTimezone=UTC")
-      .setDrivername("com.mysql.jdbc.Driver")
+      .setDriverName("com.mysql.jdbc.Driver")
       .setUsername("root")
       .setPassword("111111")
-      .setQuery("insert into  wordcount (word, count) values(?, ?)")
-      .setParameterTypes(java.sql.Types.VARCHAR, java.sql.Types.INTEGER)
+      .setTableName("wordcount")
+      .build()
+    val jdbcAppendTableSink = JdbcUpsertTableSink.builder()
+      .setOptions(jdbcOptions)
       .build()
 
     blinkStreamTable.registerTableSink("word1", Array("word", "count"), Array(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO), jdbcAppendTableSink)
