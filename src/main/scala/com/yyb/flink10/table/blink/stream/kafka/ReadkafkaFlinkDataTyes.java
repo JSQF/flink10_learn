@@ -1,18 +1,21 @@
 package com.yyb.flink10.table.blink.stream.kafka;
 
+import com.alibaba.fastjson.JSON;
+import com.yyb.flink10.commonEntity.User;
 import com.yyb.flink10.util.JsonDeserializationSchema;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.table.types.DataType;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -48,14 +51,26 @@ public class ReadkafkaFlinkDataTyes {
         properties.setProperty("zookeeper.connect", prop.getProperty("zookeeper.connect"));
         properties.setProperty("group.id", "test");
 
-        FlinkKafkaConsumer011 kafkaSource = new FlinkKafkaConsumer011("eventsource_order_yyb", new JsonDeserializationSchema(), properties);
-        DataStream stream = env.addSource(kafkaSource);
+        FlinkKafkaConsumer011<String> kafkaSource = new FlinkKafkaConsumer011<String>("eventsource_order_yyb", new SimpleStringSchema(), properties);
+        DataStream<String> stream = env.addSource(kafkaSource);
+        SingleOutputStreamOperator<User> userStream = stream.map(new MapFunction<String, User>() {
+            @Override
+            public User map(String s) throws Exception {
+                return JSON.parseObject(s, User.class);
+            }
+        });
 
-        stream.print();
-        Table t = blinkTableEnv.fromDataStream(stream);
+        userStream.print();
+        Table t = blinkTableEnv.fromDataStream(userStream);
         blinkTableEnv.createTemporaryView("t", t);
-        String sql = "select * from t";
-        blinkTableEnv.sqlQuery(sql).printSchema();
+        String sql = "select user_id, count(*) / 100.0 cnt_avg from t group by user_id";
+        Table t1 = blinkTableEnv.sqlQuery(sql);
+        t1.printSchema();
+        DataType[] dataTypes = t1.getSchema().getFieldDataTypes();
+        for(DataType dataType : dataTypes){
+            System.out.println(dataType.toString());
+        }
+
 
         env.execute();
     }

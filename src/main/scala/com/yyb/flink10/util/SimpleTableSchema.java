@@ -1,15 +1,5 @@
-package com.saic.hermes.utils;
+package com.yyb.flink10.util;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.IntStream;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.DataTypes.Field;
 import org.apache.flink.table.api.TableException;
@@ -17,6 +7,10 @@ import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.DecimalType;
 import org.apache.flink.util.Preconditions;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class SimpleTableSchema implements Serializable {
 
