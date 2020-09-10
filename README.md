@@ -175,6 +175,15 @@ OnCheckpointRollingPolicy 的 滚动执行只会在 每一次 checkpoint 的时�
 [查看示例](./src/main/scala/com/yyb/flink10/table/blink/DataStream/JDBC/WriteDataByJDBCTableSink.scala)  
 
 #### Kafka  
+质疑配置参数：  
+```
+producerProps.setProperty("transaction.timeout.ms", "3000") 
+producerProps.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true") 
+producerProps.setProperty("max.in.flight.requests.per.connection", "1") 
+producerProps.setProperty("retries", "5") 
+producerProps.setProperty("acks", "all")
+```   
+
 因为kafka没有对应的 OutputFormat，所以我们必须自己实现 KafkaOutputFormat。  
 [查看示例](./src/main/scala/com/yyb/flink10/OutputFormat/KafkaOutputFormat.java)  
 因为kafka没有对应的 BatchTableSink，所以我们必须自己实现 KafkaBatchTableSink。  
@@ -359,3 +368,112 @@ DataStream<Current1> streamOrder = streamOrderStr.map(new MapFunction<String, Cu
            });
 streamOrder.assignTimestampsAndWatermarks(new TimestampExtractorOrder(Time.seconds(0)));
 ```   
+### Flink kafka 2 kafka transactionId问题反馈  
+[参考](https://www.mail-archive.com/user-zh@flink.apache.org/msg04071.html)  
+```
+*一、场景说明：*
+
+  flink作业逻辑：source（kakfa）-> data process (wordCount逻辑) -> sink (kafka)
+
+  1、作业A：
+         source_topic: word_count_topic
+         sink_topc: result_01
+         group_id: test-group01
+
+  2、作业B：
+         source_topic: word_count_topic
+         sink_topc: result_02
+         group_id: test-group02
+
+3、两个作业使用的是同一个jar包，同一段代码，唯独group.id 和 sink_topic不同。
+
+4、FlinkKafkaProducer 使用 EXACTLY_ONCE 语义，使用kafak事务向topic写入数据。
+
+*现象：*
+  从以下错误日志可以看出，transactionid相互干扰。
+
+ *jobmanager端错误日志：*
+org.apache.flink.streaming.connectors.kafka.FlinkKafkaException: Failed to
+send data to Kafka: Producer attempted an operation with an old epoch.
+Either there is a newer producer with the same transactionalId, or the
+producer's transaction has been expired by the broker.
+at
+org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.checkErroneous(FlinkKafkaProducer.java:1227)
+at
+org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.invoke(FlinkKafkaProducer.java:741)
+at
+org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.invoke(FlinkKafkaProducer.java:90)
+at
+org.apache.flink.streaming.api.functions.sink.TwoPhaseCommitSinkFunction.invoke(TwoPhaseCommitSinkFunction.java:231)
+at
+org.apache.flink.streaming.api.operators.StreamSink.processElement(StreamSink.java:56)
+at
+org.apache.flink.streaming.runtime.tasks.OperatorChain$CopyingChainingOutput.pushToOperator(OperatorChain.java:637)
+at
+org.apache.flink.streaming.runtime.tasks.OperatorChain$CopyingChainingOutput.collect(OperatorChain.java:612)
+at
+org.apache.flink.streaming.runtime.tasks.OperatorChain$CopyingChainingOutput.collect(OperatorChain.java:592)
+at
+org.apache.flink.streaming.runtime.tasks.OperatorChain$BroadcastingOutputCollector.collect(OperatorChain.java:707)
+at
+org.apache.flink.streaming.runtime.tasks.OperatorChain$BroadcastingOutputCollector.collect(OperatorChain.java:660)
+at
+org.apache.flink.streaming.api.operators.AbstractStreamOperator$CountingOutput.collect(AbstractStreamOperator.java:727)
+at
+org.apache.flink.streaming.api.operators.AbstractStreamOperator$CountingOutput.collect(AbstractStreamOperator.java:705)
+at
+org.apache.flink.streaming.api.operators.StreamGroupedReduce.processElement(StreamGroupedReduce.java:64)
+at
+org.apache.flink.streaming.runtime.io.StreamOneInputProcessor.processElement(StreamOneInputProcessor.java:164)
+at
+org.apache.flink.streaming.runtime.io.StreamOneInputProcessor.processInput(StreamOneInputProcessor.java:143)
+at
+org.apache.flink.streaming.runtime.tasks.StreamTask.processInput(StreamTask.java:279)
+at
+org.apache.flink.streaming.runtime.tasks.StreamTask.run(StreamTask.java:321)
+at
+org.apache.flink.streaming.runtime.tasks.StreamTask.runAndHandleCancel(StreamTask.java:286)
+at
+org.apache.flink.streaming.runtime.tasks.StreamTask.invoke(StreamTask.java:426)
+at org.apache.flink.runtime.taskmanager.Task.doRun(Task.java:705)
+at org.apache.flink.runtime.taskmanager.Task.run(Task.java:530)
+at java.lang.Thread.run(Thread.java:745)
+Caused by: org.apache.kafka.common.errors.ProducerFencedException: Producer
+attempted an operation with an old epoch. Either there is a newer producer
+with the same transactionalId, or the producer's transaction has been
+expired by the broker.
+
+*takmanager端错误日志：*
+org.apache.kafka.common.errors.ProducerFencedException: Producer attempted
+an operation with an old epoch. Either there is a newer producer with the
+same transactionalId, or the producer's transaction has been expired by the
+broker.
+
+org.apache.flink.streaming.connectors.kafka.FlinkKafkaException: Failed to
+send data to Kafka: Producer attempted an operation with an old epoch.
+Either there is a newer producer with the same transactionalId, or the
+producer's transaction has been expired by the broker.
+at
+org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.checkErroneous(FlinkKafkaProducer.java:1227)
+at
+org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.close(FlinkKafkaProducer.java:837)
+at
+org.apache.flink.api.common.functions.util.FunctionUtils.closeFunction(FunctionUtils.java:43)
+at
+org.apache.flink.streaming.api.operators.AbstractUdfStreamOperator.dispose(AbstractUdfStreamOperator.java:117)
+at
+org.apache.flink.streaming.runtime.tasks.StreamTask.disposeAllOperators(StreamTask.java:605)
+at
+org.apache.flink.streaming.runtime.tasks.StreamTask.invoke(StreamTask.java:504)
+at org.apache.flink.runtime.taskmanager.Task.doRun(Task.java:705)
+at org.apache.flink.runtime.taskmanager.Task.run(Task.java:530)
+at java.lang.Thread.run(Thread.java:745)
+Caused by: org.apache.kafka.common.errors.ProducerFencedException: Producer
+attempted an operation with an old epoch. Either there is a newer producer
+with the same transactionalId, or the producer's transaction has been
+expired by the broker.
+2020-06-04 16:48:36,817 INFO  org.apache.flink.runtime.taskmanager.Task
+                - pend-name -> (Sink: pnt-name, Sink: sink-name) (1/1)
+(db4ee0c44888e866b3d26d39b34a0bd8) switched from RUNNING to FAILED.
+```   
+
