@@ -49,7 +49,7 @@ public class ReadkafkaFlinkDataTyes {
         properties.setProperty("group.id", "test");
 
 
-        FlinkKafkaConsumer011<String> kafkaSource = new FlinkKafkaConsumer011<String>("as28-50p", new SimpleStringSchema(), properties);
+        FlinkKafkaConsumer011<String> kafkaSource = new FlinkKafkaConsumer011<String>("as28-60p", new SimpleStringSchema(), properties);
         DataStreamSource<String> source = env.addSource(kafkaSource);
         source.map(new MapFunction<String, Object>() {
             @Override
