@@ -25,4 +25,9 @@ public class Pi{
     public void setTime(String time) {
         this.time = time;
     }
+
+    public Pi(String id, String time) {
+        this.id = id;
+        this.time = time;
+    }
 }

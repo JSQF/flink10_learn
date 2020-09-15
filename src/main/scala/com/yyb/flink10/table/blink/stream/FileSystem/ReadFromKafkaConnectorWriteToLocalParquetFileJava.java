@@ -48,12 +48,12 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment flinkTableEnv = StreamTableEnvironment.create(env, setttings);
 
-        env.enableCheckpointing(20);
+        env.enableCheckpointing(2000);
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
 
         Kafka kafka = new Kafka();
         kafka.version("0.11")
-                .topic("eventsource_yhj")
+                .topic("eventsource_yyb_pi")
                 .property("zookeeper.connect", "172.16.10.16:2181,172.16.10.17:2181,172.16.10.18:2181")
                 .property("bootstrap.servers", "172.16.10.19:9092,172.16.10.26:9092,172.16.10.27:9092")
                 .property("group.id", "yyb_dev")
@@ -85,6 +85,7 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
 
         //transfor 2 dataStream
         DataStream<Row> dataStream = flinkTableEnv.toAppendStream(test, Row.class);
+        dataStream.print().setParallelism(1);
 
 
          class TransforMapFunc implements MapFunction<Row, GenericRecord>, Serializable {
@@ -126,7 +127,7 @@ public class ReadFromKafkaConnectorWriteToLocalParquetFileJava {
                 .withRollingPolicy(OnCheckpointRollingPolicy.build())
                 .build();
         dataStreamOfGenericDataRecord.addSink(parquetSink).setParallelism(1);
-        flinkTableEnv.execute("ReadFromKafkaConnectorWriteToLocalFileJava");
+        env.execute("ReadFromKafkaConnectorWriteToLocalFileJava");
 
 
     }

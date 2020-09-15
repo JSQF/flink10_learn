@@ -111,6 +111,12 @@ under the License.
 			<artifactId>flink-parquet_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
 			<scope>${slef.scope}</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>parquet-hadoop</artifactId>
+					<groupId>org.apache.parquet</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.parquet</groupId>
