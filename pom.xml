@@ -48,7 +48,7 @@ under the License.
 		<flink.version>1.10.0</flink.version>
 		<scala.binary.version>2.11</scala.binary.version>
 		<scala.version>2.11.8</scala.version>
-        <hive.version>2.1.1</hive.version>
+        <hive.version>2.3.4</hive.version>
         <jdo.version>3.2.0-m3</jdo.version>
 		<kafka.version>0.11</kafka.version>
 		<maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
