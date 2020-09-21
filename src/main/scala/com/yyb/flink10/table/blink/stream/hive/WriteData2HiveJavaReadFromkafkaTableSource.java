@@ -16,6 +16,10 @@ import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.flink.table.descriptors.Schema;
+import org.apache.flink.table.types.AtomicDataType;
+import org.apache.flink.table.types.logical.LogicalType;
+import org.apache.flink.table.types.logical.TimestampKind;
+import org.apache.flink.table.types.logical.TimestampType;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -33,10 +37,13 @@ public class WriteData2HiveJavaReadFromkafkaTableSource {
         EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
+        LogicalType logicalType = new TimestampType(false, TimestampKind.PROCTIME, 3);
+        AtomicDataType atomicDataType = new AtomicDataType(logicalType);
         Schema schema = new Schema();
         TableSchema tableSchema = TableSchema.builder()
                 .field("id", DataTypes.STRING())
                 .field("time", DataTypes.STRING())
+//                .field("proctime", atomicDataType)
                 .build();
         schema.schema(tableSchema);
         Properties prop = new Properties();

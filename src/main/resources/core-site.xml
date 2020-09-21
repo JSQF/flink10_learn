@@ -135,11 +135,15 @@
     <final>true</final>
   </property>
   <property>
-    <name>fs.protected.directories</name>
-    <value>/testdir</value>
-  </property>
-  <property>
     <name>ipc.maximum.data.length</name>
     <value>268435456</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.smcjob.groups</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.smcjob.hosts</name>
+    <value>*</value>
   </property>
 </configuration>
