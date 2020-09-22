@@ -30,7 +30,7 @@ public class UseCatalogCreateTable {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
         String name = "myhive";
-        String defaultDatabase = "test";
+        String defaultDatabase = "test_zcy";
         String hiveConfDir = WriteData2HiveJavaReadFromkafkaTableSource.class.getResource("/").getFile();  //可以通过这一种方式设置 hiveConfDir，这样的话，开发与测试和生产环境可以保持一致
         String version = "2.1.1";
         HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
@@ -45,7 +45,7 @@ public class UseCatalogCreateTable {
                 .field("order_id", DataTypes.STRING())
                 .field("product_id", DataTypes.INT())
                 .field("create_time", DataTypes.TIMESTAMP(3))
-                .field("proctime", atomicDataType)
+                .field("proctime", atomicDataType, "PROCTIME()")
                 .build();
 
         HashMap<String, String> properties = new HashMap<String, String>();
@@ -57,13 +57,13 @@ public class UseCatalogCreateTable {
         properties.put("format", "json");
         //properties.put("update-mode", "append");
 
-        ObjectPath tablePath = new ObjectPath("test_zcy", "kafka_order");
-//        hive.createTable(tablePath, new CatalogTableImpl(
-//                        tableSchema,
-//                        properties,
-//                        "kafka table"
-//                ),
-//                false);
+        ObjectPath tablePath = new ObjectPath("test_zcy", "kafka_order_yyb1");
+        hive.createTable(tablePath, new CatalogTableImpl(
+                        tableSchema,
+                        properties,
+                        "kafka table"
+                ),
+                false);
 
         String sql = "  CREATE TABLE xxxx (\n" +
                 "     dt TIMESTAMP(3),\n" +
@@ -93,8 +93,25 @@ public class UseCatalogCreateTable {
                 "     'format.fail-on-missing-field' = 'true'\n" +
                 " )";
 
-        tableEnv.executeSql(sql);
+        sql =   "CREATE TABLE kafka_order_yyb (\n" +
+        "     order_id BIGINT,\n" +
+                "     product_id INT,\n" +
+                "     create_time TIMESTAMP(3),\n" +
+                "     proctime AS PROCTIME()\n" +
+                " ) WITH (\n" +
+                "     'connector.type' = 'kafka',\n" +
+                "     'connector.version' = '0.11',\n" +
+                "     'connector.topic' = 'kafka_order',\n" +
+                "     'connector.properties.bootstrap.servers' = '172.16.10.19:9092,172.16.10.26:9092,172.16.10.27:9092',\n" +
+                "     'connector.startup-mode' = 'latest-offset',\n" +
+                "     'update-mode' = 'append',\n" +
+                "     'format.type' = 'json',\n" +
+                "     'format.fail-on-missing-field' = 'true'\n" +
+                " )"
+        ;
 
-        env.execute("UseCatalogCreateTable");
+//        tableEnv.executeSql(sql);
+
+//        env.execute("UseCatalogCreateTable");
     }
 }

@@ -223,6 +223,20 @@ producerProps.setProperty("acks", "all")
 7. Blink 优化多个 sink 对于一个DAG（只有 TableEnvironment， 不支持 StreamTableEnvironment ）；old flink planner 总是优化 每个 sink 在新的 DAG。
 8. old flink planner 不再支持 catalog statistics，Blink 则支持。
 
+### TableSchema  
+tableSchema 里面的内容不仅仅是 字段，字段类型 ，还有一个 表达式的东西；  
+这个表达式就是 产生 PROCTINE，WATERMARK 的关键点。  
+[例如](./src/main/scala/com/yyb/flink10/table/blink/stream/hive/UseCatalogCreateTable.java)  
+的48 行 ，会在 hive catalog中 产生下面的 schema信息：  
+```
+root
+ |-- order_id: STRING
+ |-- product_id: INT
+ |-- create_time: TIMESTAMP(3)
+ |-- proctime: TIMESTAMP(3) NOT NULL *PROCTIME* AS PROCTIME()
+```  
+
+
 ### TableConfig  
 可以通过 TableConfig 配置 state 的过期时间等等  
 
