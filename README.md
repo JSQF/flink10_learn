@@ -491,3 +491,10 @@ expired by the broker.
 (db4ee0c44888e866b3d26d39b34a0bd8) switched from RUNNING to FAILED.
 ```   
 
+
+## 编程注意
+### 算子name
+为了以后作业的 算子增删，最好在每个算子指定 uid命名，以便业务变化和状态回放！！  
+### 写入kafka
+#### 写入kafka的 事务id问题
+当flink事务写入kafka的时候，会出现 trsance id的问题，需要自己 指定 算子的 name，那么这个时候，最后 使用 topic + group 这种方式命名，防止和其他作业 的name 一致！！！  
