@@ -54,7 +54,6 @@ public class EventTimeDemo {
         FlinkKafkaConsumer011<String> kafkaSource = new FlinkKafkaConsumer011<String>("eventsource_yyb", new SimpleStringSchema(), properties);
         DataStream<String> stream = env.addSource(kafkaSource);
 
-
         DataStream<Current1> currentDS = stream.process(new ProcessFunction<String, Current1>() {
             @Override
             public void processElement(String value, Context ctx, Collector<Current1> out) throws Exception {

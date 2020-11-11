@@ -45,6 +45,12 @@ public class WordCountElementsSourceStreamFileSinkJava {
             text = env.fromElements(WordCountData.WORDS);
         }
 
+        System.out.println(WordCountData.WORDS.getClass() instanceof Class);
+        System.out.println(((Class)WordCountData.WORDS.getClass()).getGenericSuperclass());
+        System.out.println(new Object().getClass() instanceof Class);
+        System.out.println(((Class)new Object().getClass()).getGenericSuperclass());
+
+
         DataStream<Tuple2<String, Integer>> counts = text.flatMap(new myFlatMap());
         SingleOutputStreamOperator<Tuple2<String, Integer>> rs = counts.keyBy(0).sum(1);
 

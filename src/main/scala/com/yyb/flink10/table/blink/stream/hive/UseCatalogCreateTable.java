@@ -9,14 +9,17 @@ import org.apache.flink.table.catalog.CatalogTableImpl;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
+import org.apache.flink.table.catalog.exceptions.TableNotExistException;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.flink.table.descriptors.Schema;
 import org.apache.flink.table.types.AtomicDataType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.TimestampKind;
 import org.apache.flink.table.types.logical.TimestampType;
+import org.apache.hadoop.hive.metastore.api.Table;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Author yyb
@@ -37,17 +40,30 @@ public class UseCatalogCreateTable {
 
         tableEnv.registerCatalog("myhive", hive);
         tableEnv.useCatalog("myhive");
+//        createTale(hive);
+        alterTale(hive);
+
+//        env.execute("UseCatalogCreateTable");
+    }
+
+    public static void alterTale(HiveCatalog hive) throws TableNotExistException {
+
+        ObjectPath table = new ObjectPath("test_zcy", "visit_log_test");
+        Table t1 = hive.getHiveTable(table);
+        System.out.println(t1.getTableName());
+        Map<String, String> params =  t1.getParameters();
+        for(Map.Entry<String, String> p : params.entrySet()){
+            System.out.println(p.getKey() + "->" + p.getValue());
+        }
 
         LogicalType logicalType = new TimestampType(false, TimestampKind.PROCTIME, 3);
         AtomicDataType atomicDataType = new AtomicDataType(logicalType);
-        Schema schema = new Schema();
         TableSchema tableSchema = TableSchema.builder()
                 .field("order_id", DataTypes.STRING())
                 .field("product_id", DataTypes.INT())
                 .field("create_time", DataTypes.TIMESTAMP(3))
                 .field("proctime", atomicDataType, "PROCTIME()")
                 .build();
-
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("connector", "kafka-0.11");
         properties.put("topic", "flink_sql_test");
@@ -55,16 +71,15 @@ public class UseCatalogCreateTable {
                 "172.16.10.19:9092,172.16.10.26:9092,172.16.10.27:9092");
         properties.put("scan.startup.mode", "latest-offset");
         properties.put("format", "json");
-        //properties.put("update-mode", "append");
 
-        ObjectPath tablePath = new ObjectPath("test_zcy", "kafka_order_yyb1");
-        hive.createTable(tablePath, new CatalogTableImpl(
-                        tableSchema,
-                        properties,
-                        "kafka table"
-                ),
-                false);
+        properties.put("commit_delay",  "4000");
 
+        ObjectPath table1 = new ObjectPath("test_zcy", "visit_log_test_yyb");
+        CatalogTableImpl catalogTable = new CatalogTableImpl(tableSchema, properties, "flink-hive-table");
+        hive.alterTable(table1, catalogTable, true);
+
+    }
+    public void createTableByDDL(){
         String sql = "  CREATE TABLE xxxx (\n" +
                 "     dt TIMESTAMP(3),\n" +
                 "     conn_id STRING,\n" +
@@ -94,7 +109,7 @@ public class UseCatalogCreateTable {
                 " )";
 
         sql =   "CREATE TABLE kafka_order_yyb (\n" +
-        "     order_id BIGINT,\n" +
+                "     order_id BIGINT,\n" +
                 "     product_id INT,\n" +
                 "     create_time TIMESTAMP(3),\n" +
                 "     proctime AS PROCTIME()\n" +
@@ -109,9 +124,35 @@ public class UseCatalogCreateTable {
                 "     'format.fail-on-missing-field' = 'true'\n" +
                 " )"
         ;
+        //        tableEnv.executeSql(sql);
+    }
 
-//        tableEnv.executeSql(sql);
+    public static void createTale(HiveCatalog hive) throws TableAlreadyExistException, DatabaseNotExistException {
+        LogicalType logicalType = new TimestampType(false, TimestampKind.PROCTIME, 3);
+        AtomicDataType atomicDataType = new AtomicDataType(logicalType);
+        Schema schema = new Schema();
+        TableSchema tableSchema = TableSchema.builder()
+                .field("order_id", DataTypes.STRING())
+                .field("product_id", DataTypes.INT())
+                .field("create_time", DataTypes.TIMESTAMP(3))
+                .field("proctime", atomicDataType, "PROCTIME()")
+                .build();
 
-//        env.execute("UseCatalogCreateTable");
+        HashMap<String, String> properties = new HashMap<String, String>();
+        properties.put("connector", "kafka-0.11");
+        properties.put("topic", "flink_sql_test");
+        properties.put("properties.bootstrap.servers",
+                "172.16.10.19:9092,172.16.10.26:9092,172.16.10.27:9092");
+        properties.put("scan.startup.mode", "latest-offset");
+        properties.put("format", "json");
+        //properties.put("update-mode", "append");
+
+        ObjectPath tablePath = new ObjectPath("test_zcy", "visit_log_test_yyb");
+        hive.createTable(tablePath, new CatalogTableImpl(
+                        tableSchema,
+                        properties,
+                        "kafka table"
+                ),
+                false);
     }
 }
