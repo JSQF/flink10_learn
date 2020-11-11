@@ -3,6 +3,7 @@ package com.yyb.flink10.table.blink.stream.hive;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.CatalogTableImpl;
@@ -33,17 +34,51 @@ public class UseCatalogCreateTable {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
         String name = "myhive";
-        String defaultDatabase = "test_zcy";
+        String defaultDatabase = "mirrordata";
         String hiveConfDir = WriteData2HiveJavaReadFromkafkaTableSource.class.getResource("/").getFile();  //可以通过这一种方式设置 hiveConfDir，这样的话，开发与测试和生产环境可以保持一致
         String version = "2.1.1";
         HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
 
         tableEnv.registerCatalog("myhive", hive);
         tableEnv.useCatalog("myhive");
+
+        alterHiveTableProperties(hive);
+//        createHiveSql(tableEnv);
+
 //        createTale(hive);
-        alterTale(hive);
+//        alterTale(hive);
 
 //        env.execute("UseCatalogCreateTable");
+    }
+
+
+    public static void createHiveSql(StreamTableEnvironment tableEnv ){
+
+        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
+        tableEnv.useDatabase("mirrordata");
+        //注意这样可以修改 hive 表的 TBLPROPERTIES，但是都有 flink的 前缀；flink.a=1,flink.b=2
+        String sql = "alter table hive_order11 SET TBLPROPERTIES('a'='1','b'='2')";
+        tableEnv.executeSql(sql);
+    }
+
+    public static void alterHiveTableProperties(HiveCatalog hive) throws TableNotExistException {
+
+        ObjectPath table1 = new ObjectPath("mirrordata", "hive_order11");
+
+        LogicalType logicalType = new TimestampType(false, TimestampKind.PROCTIME, 3);
+        AtomicDataType atomicDataType = new AtomicDataType(logicalType);
+        TableSchema tableSchema = TableSchema.builder()
+                .field("order_id1", DataTypes.STRING())
+                .field("product_id1", DataTypes.INT())
+                .field("create_time1", DataTypes.TIMESTAMP(3))
+                .field("proctime", atomicDataType, "PROCTIME()")
+                .build();
+        HashMap<String, String> properties = new HashMap<String, String>();
+        properties.put("alter.table.op", "CHANGE_TBL_PROPS"); //这里标示 就是 修改 hive table properties
+        properties.put("a", "3");
+
+        CatalogTableImpl catalogTable = new CatalogTableImpl(tableSchema, properties, "flink-hive-table");
+        hive.alterTable(table1, catalogTable, true);
     }
 
     public static void alterTale(HiveCatalog hive) throws TableNotExistException {
