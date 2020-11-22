@@ -77,9 +77,10 @@ public class WriteData2HiveJavaReadFromkafkaTableSource {
 
         tableEnv.registerCatalog("myhive", hive);
         tableEnv.useCatalog("myhive");
+        tableEnv.createTemporaryView("kafkaSource", kafkaSource);
 
-        sql = "insert into myhive.test.a select * from default_catalog.kafkaSource";
-        tableEnv.sqlUpdate(sql);
+        sql = "insert into myhive.test.a select * from kafkaSource";
+        tableEnv.executeSql(sql);
 
         DataStream<Pi> kafkaSourceDataStream = tableEnv.toAppendStream(kafkaSource, Pi.class);
          kafkaSourceDataStream.print().setParallelism(1);
